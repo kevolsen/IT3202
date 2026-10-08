@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buddy Week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #e8ecf2; font-family: Inter, system-ui, sans-serif; color: #14243a; }
+  body { display: flex; align-items: center; justify-content: center; }
+  #app { width: 393px; height: 852px; border-radius: 36px; overflow: hidden; background: #fff; box-shadow: 0 20px 60px rgba(16,24,25,.18); position: relative; }
+  @media (max-width: 500px), (max-height: 860px) and (max-width: 900px) {
+    body { display: block; background: #fff; }
+    #app { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+  .noscroll { scrollbar-width: none; } .noscroll::-webkit-scrollbar { display: none; }
+  button, a { cursor: pointer; text-align: inherit; font: inherit; color: inherit; }
+  textarea, input { font: inherit; color: inherit; outline: none; background: transparent; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// External links — replace with your real Messenger links.
+const CONFIG = {
+  messenger: { group: 'https://m.me/', henrik: 'https://m.me/', sara: 'https://m.me/', emil: 'https://m.me/' },
+  phones: { emil: '+4793214607' },
+};
+const maps = q => 'https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + encodeURIComponent(q);
+
+const S = { role: 'student', screen: 'login', param: null, stack: [], day: 0, scope: 'all', chips: [], joined: {}, sel: null, share: false, pin: true, phone: '412 58 903', posts: [],
+  draft: 'The pre-party now starts at 20:00 at Moholt, not 19:00. Meet outside Herman Krags veg 12. We’ll head to Samfundet together for 22:00. See you there!' };
+
+const BUD = { henrik: { name: 'Henrik Aune', photo: 'henrik-3', short: 'Henrik' }, sara: { name: 'Sara Lund', photo: 'sara-3', short: 'Sara' } };
+const DAYS = [['Mon', 10, 'Monday'], ['Tue', 11, 'Tuesday'], ['Wed', 12, 'Wednesday'], ['Thu', 13, 'Thursday'], ['Fri', 14, 'Friday'], ['Sat', 15, 'Saturday'], ['Sun', 16, 'Sunday']];
+const EV = {
+  tour: { d: 0, t: '12:00', place: 'Gløshaugen', title: 'Campus tour', tags: ['My group'], mine: 1, sub: 'Today · Group 7 · My group', venue: 'Gløshaugen · Main building', addr: 'Høgskoleringen 1 · main building entrance', mapName: 'Gløshaugen', street: 'Høgskoleringen', cap: 'Main entrance', dist: '600 m · 8 min walk', about: 'A relaxed walk around campus with Group 7 to find lecture halls, the library and the canteen.', bring: 'Comfortable shoes and a light jacket.', buddy: 'sara', going: 9, dest: 'NTNU Hovedbygningen, Høgskoleringen 1, Trondheim' },
+  coffee: { d: 0, t: '15:00', place: 'Kalvskinnet', title: 'Welcome coffee', tags: ['Open · not Group 7', 'Calm', 'Alcohol-free'], sub: 'Today · Open to all · Calm', venue: 'Kalvskinnet campus', addr: 'Gunnerus gate 1 · canteen', mapName: 'Kalvskinnet', street: 'Gunnerus gate', cap: 'Canteen', dist: '2.1 km · 28 min walk', about: 'Coffee and a quiet chat with new students from all groups.', bring: 'Nothing, just yourself.', buddy: 'sara', going: 14, dest: 'NTNU Kalvskinnet, Trondheim' },
+  pre: { d: 0, t: '20:00', place: 'Moholt', title: 'Pre-party at Henrik’s', tags: ['Social'], mine: 1, upd: 'Time changed: 19:00 → 20:00', sub: 'Today · Group 7 · Social', venue: 'Moholt · Henrik’s place', addr: 'Herman Krags veg 12 · meet outside the entrance', mapName: 'Moholt studentby', street: 'Herman Krags veg', cap: 'Henrik’s · 20:00', dist: '2.8 km · 38 min walk', about: 'Get to know Group 7 before we head to Samfundet. Come as you are; drinking is optional.', bring: 'A light jacket and your own drink, if you like.', buddy: 'henrik', going: 8, dest: 'Herman Krags veg 12, Trondheim' },
+  sam: { d: 0, t: '22:00', place: 'Samfundet', title: 'Party at Samfundet', tags: ['Social'], mine: 1, sub: 'Today · Group 7 · Social', venue: 'Samfundet', addr: 'Elgeseter gate 1 · main entrance, red round building', mapName: 'Samfundet', street: 'Elgeseter gate', cap: 'Main entrance', round: 1, dist: '850 m · 12 min walk', about: 'Meet Group 7 for music and a relaxed first night at Samfundet. We’ll go in together.', bring: 'Photo ID, student ID and a light jacket.', buddy: 'sara', going: 8, dest: 'Studentersamfundet, Elgeseter gate 1, Trondheim' },
+  rebus: { d: 1, t: '14:00', place: 'Gløshaugen', title: 'Rebus', tags: ['My group', 'Social'], mine: 1, sub: 'Tomorrow · Group 7 · Social', venue: 'Gløshaugen · Main building', addr: 'Høgskoleringen 1 · start at the main entrance', mapName: 'Gløshaugen', street: 'Høgskoleringen', cap: 'Start', dist: '600 m · 8 min walk', about: 'A team rebus across campus. Solve the clues together with Group 7.', bring: 'A charged phone and comfortable shoes.', buddy: 'henrik', going: 10, dest: 'NTNU Hovedbygningen, Høgskoleringen 1, Trondheim' },
+  cinema: { d: 1, t: '18:00', place: 'Dragvoll', title: 'Hangover cinema', tags: ['Calm', 'Alcohol-free'], mine: 1, sub: 'Tomorrow · Open to all · Calm', venue: 'Dragvoll campus', addr: 'Loholt allé 81 · auditorium', mapName: 'Dragvoll', street: 'Loholt allé', cap: 'Auditorium', dist: '3.4 km · 45 min walk', about: 'A calm film screening with snacks. Alcohol-free.', bring: 'A blanket if you get cold.', buddy: 'sara', going: 12, dest: 'NTNU Dragvoll, Trondheim' },
+  toga: { d: 2, t: '20:00', place: 'Kristiansten Festning', title: 'Toga party', tags: ['Across groups'], sub: 'Wednesday · All groups · Social', venue: 'Kristiansten Festning', addr: 'Festningsgata · main gate', mapName: 'Kristiansten', street: 'Festningsgata', cap: 'Main gate', dist: '1.9 km · 25 min walk', about: 'A party for all Buddy Week groups at the fortress.', bring: 'A toga (a bed sheet works) and a jacket.', buddy: 'henrik', going: 40, dest: 'Kristiansten Festning, Trondheim' },
+};
+const ANN = [
+  { id: 'ha', av: 'HA', name: 'Henrik Aune', time: '09:24', upd: 1, hl: 1, body: 'Pre-party · 20:00 at Moholt<br>Time changed: 19:00 → 20:00', foot: 'Updated 09:24', full: 'Pre-party at Henrik’s: 20:00 at Moholt. Time changed: 19:00 → 20:00. Meet outside Herman Krags veg 12.' },
+  { id: 'sl', av: 'SL', name: 'Sara Lund', time: '09:12', body: 'Monday campus tour starts at 12:00 at Gløshaugen. Bring a jacket.', foot: 'Posted 09:12' },
+  { id: 'so', av: 'SO', name: 'Samfundet organisers', time: '08:50', body: 'Doors open at 22:00. Bring photo ID and arrive together from the pre-party.', foot: 'Posted 08:50' },
+];
+const MEMBERS = [['EB', 'Emil Berg', 0, 'Location not shared · View details →'], ['NV', 'Nora Vik', 1, 'Opted in · at Samfundet · 22:04'], ['IS', 'Ingrid Solberg', 1], ['ML', 'Maja Lien', 1], ['JA', 'Jonas Andersen', 1], ['ON', 'Oskar Nilsen', 0], ['LN', 'Linh Nguyen', 1], ['AD', 'Amalie Dahl', 1], ['AA', 'Ahmed Ali', 1], ['TH', 'Theo Hansen', 1]];
+
+// ---------- building blocks ----------
+const ic = (n, w, h = w, c = '') => `<img src="assets/${n}.svg" width="${w}" height="${h}" class="block shrink-0 ${c}" alt="">`;
+const ph = (n, s, c = '') => `<img src="assets/${n}.jpg" class="block shrink-0 rounded-full object-cover ${c}" style="width:${s}px;height:${s}px" alt="">`;
+const tag = (t, c = '') => `<span class="inline-flex shrink-0 bg-[#e7eef7] px-[9px] py-[4px] rounded-[7px] text-[#00509e] text-[11px] font-semibold leading-[1.35] whitespace-nowrap ${c}">${t}</span>`;
+const upd = (t = 'Updated') => `<span class="inline-flex shrink-0 bg-[#fff1d5] px-[9px] py-[4px] rounded-[7px] text-[#966008] text-[11px] font-semibold leading-[1.35] whitespace-nowrap">${t}</span>`;
+const av = (t, s = 28, f = 12) => `<div class="bg-[#e7eef7] flex items-center justify-center rounded-full shrink-0 font-bold text-[#00509e] leading-[1.35]" style="width:${s}px;height:${s}px;font-size:${f}px">${t}</div>`;
+const status = () => `<div class="flex h-[54px] items-center justify-between pl-[30px] pr-[26px] pt-[8px] relative shrink-0">
+  <p class="font-semibold text-[15px] leading-[1.35]">9:41</p>
+  <div class="absolute bg-[#0d1622] h-[30px] left-1/2 -translate-x-1/2 rounded-[20px] top-[11px] w-[119px]"></div>
+  <div class="flex gap-[5px] items-center">${ic('ios-signal', 18, 16)}${ic('ios-wifi', 17, 16)}${ic('ios-battery', 25, 17)}</div></div>`;
+const homeInd = () => `<div class="flex h-[25px] items-center justify-center shrink-0"><div class="bg-[#14243a] h-[5px] rounded-[5px] w-[134px]"></div></div>`;
+const avatar = () => `<button data-go="profile" aria-label="Profile">${ph(S.role === 'buddy' ? 'henrik' : 'ingrid', 36)}</button>`;
+const topHead = (title, sub, right = avatar(), subSize = 12) => `<div class="flex gap-[12px] h-[68px] items-center px-[20px] shrink-0">
+  <div class="flex-1 min-w-0 flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[28px]">${title}</p><p class="text-[#5d6b7c]" style="font-size:${subSize}px">${sub}</p></div>${right}</div>`;
+const backHead = (title, sub = '', right = '') => `<div class="flex gap-[12px] h-[68px] items-center px-[20px] shrink-0">
+  <button data-back aria-label="Back">${ic('arrow-left', 22)}</button>
+  <div class="flex-1 min-w-0 flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[20px]">${title}</p>${sub ? `<p class="text-[#5d6b7c] text-[12px]">${sub}</p>` : ''}</div>${right}</div>`;
+const body = (gap, inner, extra = '') => `<div class="flex-1 min-h-0 overflow-y-auto noscroll flex flex-col [&>*]:shrink-0 px-[20px] py-[12px] ${extra}" style="gap:${gap}px">${inner}</div>`;
+const action = inner => `<div class="pb-[10px] pt-[8px] px-[20px] shrink-0">${inner}</div>`;
+const btn = (icon, text, attrs = '', light = false) => `<${attrs.includes('href') ? 'a' : 'button'} ${attrs} class="w-full ${light ? 'bg-[#e7eef7] text-[#00509e]' : 'bg-[#00509e] text-white'} flex gap-[8px] h-[48px] items-center justify-center px-[16px] rounded-[10px] text-[16px] font-semibold leading-[1.35] whitespace-nowrap">${icon}${text}</${attrs.includes('href') ? 'a' : 'button'}>`;
+const smallBtn = (icon, text, attrs = '', solid = false) => `<a ${attrs} target="_blank" rel="noopener" class="${solid ? 'bg-[#00509e] text-white' : 'bg-[#e7eef7] text-[#00509e]'} flex shrink-0 gap-[8px] h-[38px] items-center justify-center px-[12px] rounded-[10px] text-[13px] font-semibold leading-[1.35] whitespace-nowrap">${icon}${text}</a>`;
+const ext = url => `href="${url}" target="_blank" rel="noopener"`;
+const scr = (inner, bottom) => `<div class="bg-white flex flex-col h-full">${status()}${inner}${bottom === undefined ? homeInd() : bottom}</div>`;
+const nav = a => {
+  const t = [['home', 'house', 'Home', 'home'], ['events', 'cal', 'Events', 'events'], ['map', 'map', 'Map', S.role === 'buddy' ? 'bmap' : 'map'], ['ann', 'ann', 'Announcements', S.role === 'buddy' ? 'board' : 'ann']];
+  return `<div class="bg-white border-t border-[#dfe5ed] h-[84px] pt-[10px] relative shrink-0"><div class="flex">${t.map(([k, i, l, g]) => `<button data-tab="${g}" class="flex-1 min-w-0 flex flex-col gap-[3px] items-center">${ic(i + (a === k ? '-on' : '-off'), 23)}<span class="text-[11px] leading-[1.35] whitespace-nowrap ${a === k ? 'font-bold text-[#00509e]' : 'font-medium text-[#5d6b7c]'}">${l}</span></button>`).join('')}</div>
+  <div class="absolute bg-[#14243a] bottom-[8px] h-[5px] left-1/2 -translate-x-1/2 rounded-[5px] w-[134px]"></div></div>`;
+};
+const card = (inner, c = 'bg-white border-[#dfe5ed]', gap = 10) => `<div class="border ${c} flex flex-col p-[16px] rounded-[18px] w-full" style="gap:${gap}px">${inner}</div>`;
+const toggle = (on, act) => `<button data-act="${act}" class="${on ? 'bg-[#00509e] justify-end' : 'bg-[#dfe5ed]'} flex h-[28px] items-center p-[3px] rounded-full shrink-0 w-[46px] transition-colors"><span class="bg-white rounded-full size-[22px] block"></span></button>`;
+
+// ---------- screens ----------
+const SCREENS = {
+  login: () => scr(body(24, `
+    <div class="flex gap-[10px] items-center pb-[4px] pt-[12px]"><div class="bg-[#00509e] flex items-center justify-center rounded-[14px] size-[44px]">${ic('users-round-white27', 27)}</div><p class="font-bold text-[24px] leading-[1.35]">Buddy Week</p></div>
+    <div class="h-[285px] relative overflow-hidden rounded-[18px]"><img src="assets/campus.jpg" class="absolute inset-0 size-full object-cover" alt=""><div class="absolute bg-white bottom-[16px] left-[16px] px-[12px] py-[7px] rounded-[8px] font-semibold text-[12px] leading-[1.35]">NTNU · Trondheim</div></div>
+    <div class="flex flex-col gap-[12px] leading-[1.35]"><p class="font-bold text-[34px]">A good start.<br>Together.</p><p class="text-[#5d6b7c] text-[16px]">Your group, your plans and the latest updates. All in one place.</p></div>
+    <div class="flex flex-col gap-[12px] pt-[12px]">${btn(ic('arrow-right-white', 18), 'Log in with Feide', 'data-go="welcome"')}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Use your NTNU account to get started.</p></div>
+    <p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">New here? Meet your group after login.<br>Already set up? <button data-tab="home" class="underline-offset-2 hover:underline">Go straight to Home.</button></p>`, 'pt-[16px]')),
+
+  welcome: () => scr(`<div class="flex h-[68px] items-center px-[20px] shrink-0"><div class="flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[28px]">Welcome, Ingrid</p><p class="text-[#5d6b7c] text-[12px]">First login · one-time setup</p></div></div>` +
+    body(24, `
+    <div class="flex flex-col gap-[12px] items-start pt-[14px] leading-[1.35]">${tag('YOUR BUDDY WEEK')}<p class="font-bold text-[32px]">You are in Group 7</p><p class="text-[#5d6b7c] text-[15px]">Meet your buddies. They’re here to help you settle in, find your way and feel at home.</p></div>
+    <div class="flex gap-[12px]">${['henrik', 'sara'].map(b => `<button data-go="buddy:${b}" class="bg-[#e7eef7] flex-1 min-w-0 flex flex-col gap-[10px] items-center p-[16px] rounded-[18px] leading-[1.35] text-center">${ph(b, 96)}<p class="text-[15px] w-full">${BUD[b].name}</p><p class="text-[#5d6b7c] text-[12px] w-full">Your buddy · NTNU</p></button>`).join('')}</div>
+    <div class="flex flex-col gap-[10px] leading-[1.35]"><p class="font-semibold text-[15px]">Confirm your phone number</p>
+      <label class="border border-[#dfe5ed] flex gap-[12px] h-[54px] items-center p-[16px] rounded-[10px] focus-within:border-[#00509e]"><span class="text-[#5d6b7c] text-[15px]">+47</span><input id="phone" inputmode="tel" value="${S.phone}" class="flex-1 min-w-0 text-[15px]"><span id="phoneok" style="${S.phone.replace(/\D/g, '').length >= 8 ? '' : 'visibility:hidden'}">${ic('check-teal', 18)}</span></label>
+      <p class="text-[#5d6b7c] text-[12px]">Only your buddies can see your number, so they can contact you if needed.</p></div>
+    ${card(`<div class="flex gap-[10px] items-start">${ic('shield-check22', 22)}<p class="flex-1 text-[13px] leading-[1.35]">Your location stays private unless you choose to share it.</p></div>`, 'bg-[#e7eef7] border-[#e7eef7]')}`) +
+    action(btn(ic('arrow-right-white', 18), 'Continue to Home', 'data-tab="home"'))),
+
+  home: () => scr(topHead('Hi, Ingrid 👋', 'Monday 10 August · Today') + body(16, `
+    <div class="bg-[#00509e] flex flex-col gap-[10px] p-[18px] rounded-[18px] leading-[1.35]">
+      <p class="font-semibold text-[#cddcee] text-[12px]">NEXT UP · GROUP 7</p>
+      <button data-go="event:tour" class="flex gap-[14px] items-center text-white"><span class="font-bold text-[40px]">12:00</span><span class="text-[20px]">Campus tour</span></button>
+      <p class="text-[14px] text-white">Gløshaugen · Main building entrance</p>
+      <div class="flex items-center justify-between"><p class="text-[#cddcee] text-[12px]">600 m · 8 min walk</p>
+        <a ${ext(maps(EV.tour.dest))} class="bg-white flex gap-[6px] items-center px-[12px] py-[8px] rounded-[8px] text-[#00509e] text-[13px]">${ic('navigation-teal15', 15)}Directions</a></div></div>
+    <div class="flex flex-col gap-[9px] leading-[1.35]">
+      <button data-tab="ann" class="text-[18px] text-left">Updates · View board →</button>
+      <button data-go="event:pre" class="bg-[#fff1d5] flex flex-col gap-[6px] p-[14px] rounded-[10px] text-left"><span class="flex gap-[8px] items-start w-full">${upd()}<span class="flex-1 font-semibold text-[14px]">Pre-party at Henrik’s</span></span><span class="text-[#966008] text-[14px]">Time changed: 19:00 → 20:00</span></button></div>
+    <div class="flex flex-col gap-[8px] leading-[1.35]">
+      <div class="flex items-center justify-between"><p class="text-[18px]">Later today</p><button data-tab="events" class="font-semibold text-[#00509e] text-[13px]">All events</button></div>
+      ${['pre', 'sam'].map(k => `<button data-go="event:${k}" class="flex gap-[14px] items-center py-[6px] text-left"><span class="font-bold text-[19px] w-[66px] shrink-0">${EV[k].t}</span><span class="flex-1 min-w-0 flex flex-col gap-[2px]"><span class="font-semibold text-[15px]">${EV[k].title}</span><span class="text-[#5d6b7c] text-[12px]">${EV[k].place}</span></span>${ic('chevron-right18', 18)}</button>`).join('')}</div>
+    <div class="bg-white border border-[#dfe5ed] flex flex-col gap-[9px] p-[14px] rounded-[18px] leading-[1.35]">
+      <button data-go="buddy:henrik" class="flex gap-[10px] items-center text-left">${ph('henrik-2', 34)}${ph('sara-2', 34)}<span class="flex-1 flex flex-col gap-[2px]"><span class="text-[14px]">Your group · Group 7</span><span class="text-[#5d6b7c] text-[11px]">Henrik Aune &amp; Sara Lund</span></span></button>
+      <div class="flex justify-between font-semibold text-[#00509e] text-[13px] whitespace-nowrap"><a ${ext(CONFIG.messenger.group)}>Open in Messenger</a><a ${ext(CONFIG.messenger.henrik)}>Buddy on Messenger</a></div></div>`), nav('home')),
+
+  events: () => {
+    const chip = c => { const on = S.chips.includes(c); return `<button data-act="chip:${c}" class="border ${on ? 'border-[#00509e] bg-[#e7eef7] text-[#00509e]' : 'border-[#dfe5ed] text-[#5d6b7c]'} px-[9px] py-[7px] rounded-full text-[11px] leading-[1.35] whitespace-nowrap shrink-0">${c}</button>`; };
+    const list = d => Object.entries(EV).filter(([, e]) => e.d === d && (S.scope === 'all' || e.mine) && S.chips.every(c => e.tags.includes(c)));
+    const evCard = ([k, e]) => `<button data-go="event:${k}" class="border border-[#dfe5ed] flex flex-col gap-[4px] p-[10px] rounded-[18px] w-full text-left leading-[1.35]">
+      <span class="flex gap-[10px] items-center w-full"><span class="font-bold text-[21px] whitespace-nowrap">${e.t}</span><span class="flex-1 text-[#5d6b7c] text-[13px]">${e.place}</span>${e.upd ? upd() : ''}</span>
+      <span class="flex gap-[8px] items-start w-full"><span class="flex-1 font-semibold text-[15px]">${e.title}</span>${ic('chevron-right17', 17)}</span>
+      <span class="flex gap-[6px] flex-wrap">${e.tags.map(t => tag(t)).join('')}</span></button>`;
+    const items = list(S.day), next = S.day < 6 ? list(S.day + 1) : [];
+    const preview = S.day > 0 && next.length;
+    const heading = DAYS[S.day][2] + (S.day === 0 ? ' · Today' : S.day === 1 ? ' · Tomorrow' : '');
+    return scr(topHead('Events', '10–16 August · Buddy Week') + body(10, `
+      <div class="flex gap-[5px] leading-[1.35] whitespace-nowrap">${DAYS.map(([d, n], i) => `<button data-act="day:${i}" class="${i === S.day ? 'bg-[#00509e] text-white' : 'bg-[#f6f8f8]'} flex-1 min-w-0 flex flex-col gap-[4px] h-[57px] items-center justify-center rounded-[10px]"><span class="font-semibold text-[11px] ${i === S.day ? '' : 'text-[#5d6b7c]'}">${d}</span><span class="text-[16px]">${n}</span></button>`).join('')}</div>
+      <div class="bg-[#f6f8f8] flex gap-[4px] h-[42px] p-[4px] rounded-[10px]">${[['mine', 'My group'], ['all', 'All events']].map(([k, l]) => `<button data-act="scope:${k}" class="${S.scope === k ? 'bg-white text-[#00509e]' : 'text-[#5d6b7c]'} flex-1 flex items-center justify-center rounded-[7px] font-semibold text-[14px] leading-[1.35]">${l}</button>`).join('')}</div>
+      <div class="flex gap-[6px] overflow-x-auto noscroll">${['Social', 'Calm', 'Alcohol-free', 'Across groups'].map(chip).join('')}</div>
+      <p class="text-[18px] leading-[1.35]">${heading}</p>
+      <div class="flex flex-col gap-[10px]">${items.length ? items.map(evCard).join('') : `<p class="text-[#5d6b7c] text-[13px] leading-[1.35]">No events match for this day.</p>`}</div>
+      ${preview ? `<div class="flex flex-col gap-[10px] pt-[12px]"><p class="font-semibold text-[#5d6b7c] text-[13px] leading-[1.35]">COMING UP · ${DAYS[S.day + 1][2].toUpperCase()}</p>${next.map(evCard).join('')}</div>` : ''}
+      ${S.scope === 'mine' && !preview ? `<p class="text-[#5d6b7c] text-[12px] leading-[1.35]">Showing activities for Group 7. Switch to All events to see what else is on.</p>` : ''}`), nav('events'));
+  },
+
+  event: k => {
+    const e = EV[k], j = !!S.joined[k], b = BUD[e.buddy];
+    return scr(backHead('Event details') + body(e.upd ? 8 : 11, `
+      <div class="flex flex-col gap-[5px] leading-[1.35]"><p class="font-bold text-[25px]">${e.title}</p>
+        <div class="flex gap-[16px] items-center"><p class="font-bold text-[#00509e] text-[40px] whitespace-nowrap">${e.t}</p><div class="flex-1 flex flex-col gap-[2px]"><p class="font-semibold text-[14px]">${DAYS[e.d][2]} ${DAYS[e.d][1]} August</p><p class="text-[#5d6b7c] text-[12px]">${e.sub}</p></div></div></div>
+      ${e.upd ? `<div class="bg-[#fff1d5] flex gap-[8px] items-center px-[12px] py-[9px] rounded-[10px]">${upd()}<p class="flex-1 font-semibold text-[#966008] text-[13px] leading-[1.35]">${e.upd}</p></div>` : ''}
+      <div class="flex flex-col gap-[3px] leading-[1.35]"><p class="text-[17px]">${e.venue}</p><p class="text-[#5d6b7c] text-[12px]">${e.addr}</p></div>
+      <a ${ext(maps(e.dest))} class="block bg-[#f0f2ed] h-[110px] relative overflow-hidden rounded-[10px] w-full">
+        <img src="assets/park-area.svg" class="absolute left-0 top-0 h-[110px] w-[353px] max-w-none" alt="">
+        <div class="absolute h-[110px] left-0 top-0 w-[353px]"><div class="absolute inset-[-3.66%_-0.26%]"><img src="assets/local-streets.svg" class="block max-w-none size-full" alt=""></div></div>
+        <div class="absolute h-[110px] left-0 top-0 w-[353px]"><div class="absolute inset-[-0.24%_0]"><img src="assets/street-centre-lines.svg" class="block max-w-none size-full" alt=""></div></div>
+        <div class="absolute h-[54px] left-[135px] top-[26px] w-[70px] ${e.round ? 'bg-[#dabfaf] rounded-[27px]' : 'bg-[#d8ddd5] rounded-[4px]'}"></div>
+        <p class="absolute font-medium left-[115px] text-[11px] top-[10px] whitespace-nowrap">${e.mapName}</p>
+        <p class="absolute font-medium left-[14px] text-[#5d6b7c] text-[10px] top-[88px] whitespace-nowrap">${e.street}</p>
+        <div class="absolute flex flex-col gap-[4px] items-center left-[139px] top-[40px]"><div class="bg-[#003c76] border-[3px] border-white flex items-center justify-center rounded-full size-[34px]">${ic('map-pin-white17', 17)}</div><div class="bg-white px-[7px] py-[4px] rounded-[6px] text-[#00509e] text-[10px] leading-[1.35] whitespace-nowrap">${e.cap}</div></div>
+        <div class="absolute bg-white flex items-center justify-center right-[10px] rounded-[8px] size-[24px] top-[10px] font-bold text-[10px] whitespace-nowrap">N ↑</div></a>
+      <div class="flex gap-[12px] items-center"><div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="font-semibold text-[14px]">${e.dist}</p><p class="text-[#5d6b7c] text-[11px]">From Hesthagen · illustrative</p></div>${smallBtn(ic('navigation-teal18', 18), 'Directions', `href="${maps(e.dest)}"`)}</div>
+      <div class="flex flex-col gap-[4px] leading-[1.35]"><p class="text-[15px]">About</p><p class="text-[#5d6b7c] text-[14px]">${e.about}</p></div>
+      <div class="flex gap-[9px] items-center">${ic('backpack', 19)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[14px]">What to bring</p><p class="text-[#5d6b7c] text-[12px]">${e.bring}</p></div></div>
+      <div class="flex gap-[10px] items-center"><button data-go="buddy:${e.buddy}">${ph(b.photo, 40)}</button><div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[14px]">${b.name}</p><p class="text-[#5d6b7c] text-[11px]">Responsible buddy</p></div>${smallBtn(ic('message-circle-teal18', 18), 'Messenger', `href="${CONFIG.messenger[e.buddy]}"`)}</div>
+      <div class="flex gap-[7px] items-center">${av('NV')}${av('ML')}${av('JA')}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">${j ? `You + ${e.going} are going` : `${e.going} students are going`}</p></div>`) +
+      action(j ? btn(ic('check-teal', 18), 'You’re going', `data-act="join:${k}"`, true) : btn(ic('plus-white', 18), 'Join', `data-act="join:${k}"`)));
+  },
+
+  map: () => {
+    const sel = S.sel;
+    const mapEl = `<div id="lmap" style="height:430px;width:100%;flex-shrink:0;border-radius:18px;overflow:hidden;position:relative;z-index:0;background:#f0f2ed"></div>`;
+    const travel = (d, k) => `<div class="flex gap-[8px] items-center"><p class="flex-1 text-[13px] leading-[1.35]">${d}</p>${smallBtn(ic('navigation-white18', 18), 'Directions', `href="${maps(EV[k].dest)}"`, true)}</div>`;
+    const SHEET = { sam: ['Main entrance · Elgeseter gate 1'], pre: ['Herman Krags veg 12 · Moholt'], tour: ['Main building entrance · Gløshaugen'] };
+    let sheet = '';
+    if (sel === 'group') sheet = `${tag('GROUP 7 · MEETING POINT', 'self-start')}<p class="font-bold text-[20px] leading-[1.35]">Gløshaugen · 12:00</p><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">Campus tour · Main building entrance</p>${travel('600 m · 8 min walk', 'tour')}<p class="text-[#5d6b7c] text-[11px] leading-[1.35]">Set by Sara at 09:15. A meeting point, not live tracking.</p>`;
+    else if (sel) sheet = `<div class="flex gap-[12px] items-center leading-[1.35]"><p class="font-bold text-[#00509e] text-[30px] whitespace-nowrap">${EV[sel].t}</p><p class="flex-1 text-[18px]">${EV[sel].title}</p></div><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${SHEET[sel][0]}</p>${travel(EV[sel].dist, sel)}<button data-go="event:${sel}" class="text-left text-[#5d6b7c] text-[11px] leading-[1.35]">From Hesthagen · View event details →</button>`;
+    const content = sel
+      ? body(0, `<div class="flex-1 min-h-[430px] relative overflow-hidden flex flex-col">${mapEl}<div class="absolute bg-white border border-[#dfe5ed] bottom-0 left-0 right-0 flex flex-col gap-[10px] p-[18px] rounded-[18px]"><button data-act="close" aria-label="Close" class="bg-[#dfe5ed] h-[4px] rounded-[4px] w-[36px]"></button>${sheet}</div></div>`)
+      : body(12, `<div class="flex gap-[7px] items-center">${ic('map-pin-teal16', 16)}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">3 activities · walks from Hesthagen</p></div>${mapEl}
+        ${btn(ic('users-round-teal18', 18), 'Where is my group?', 'data-act="group"', true)}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Find the group’s meeting point, not people.<br>Your location is not shared.</p>`);
+    return scr(topHead('Map', 'Monday · Today’s activities') + content, nav('map'));
+  },
+
+  bmap: () => scr(topHead('Group check-in', 'Group 7 · Monday evening', tag('Buddy') + avatar()) + body(10, `
+    <div class="bg-[#e7eef7] flex gap-[12px] items-center p-[12px] rounded-[10px]">${ic('map-pin-teal24', 24)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[16px]">Samfundet · 22:00</p><p class="text-[#5d6b7c] text-[12px]">8 of 10 checked in · 2 still to arrive</p></div></div>
+    <div class="flex justify-between items-start leading-[1.35] whitespace-nowrap"><p class="text-[17px]">Group 7 members</p><p class="text-[#5d6b7c] text-[12px]">10 students</p></div>
+    <div class="flex flex-col gap-px">${MEMBERS.map(([a, n, ok, extra], i) => `<div class="${i === 0 ? 'bg-[#fff1d5]' : 'bg-white'} flex gap-[9px] items-center px-[8px] rounded-[9px]" style="height:${extra ? 59 : 43}px">
+      ${i === 0 ? `<button data-go="contact" class="flex gap-[9px] items-center flex-1 min-w-0 text-left">` : ''}${av(a, 30)}<div class="flex-1 min-w-0 flex flex-col gap-px leading-[1.35]"><p class="text-[13px]">${n}</p><p class="text-[11px] ${ok ? 'text-[#5d6b7c]' : 'text-[#966008]'}">${ok ? 'Checked in at Samfundet' : 'Not checked in'}</p>${extra ? `<p class="text-[10px] ${ok ? 'text-[#00509e]' : 'text-[#5d6b7c]'}">${extra}</p>` : ''}</div>${i === 0 ? '</button>' : ''}
+      <a href="tel:${i === 0 ? CONFIG.phones.emil : ''}" class="flex flex-col gap-[2px] items-center">${ic('phone-teal17', 17)}<span class="font-semibold text-[#00509e] text-[10px] leading-[1.35]">Call</span></a></div>`).join('')}</div>
+    <div class="flex gap-[7px] items-start">${ic('shield-check16', 16)}<p class="flex-1 text-[#5d6b7c] text-[11px] leading-[1.35]">Check-ins aren’t live tracking. Individual locations are visible only with explicit opt-in.</p></div>`), nav('map')),
+
+  contact: () => scr(backHead('Member details', '', tag('Buddy')) + body(18, `
+    <div class="flex flex-col gap-[10px] items-center pt-[10px] leading-[1.35] text-center">${av('EB', 72, 24)}<p class="font-bold text-[28px]">Emil Berg</p><p class="text-[#5d6b7c] text-[14px]">New student · Group 7</p>${upd('Not checked in')}</div>
+    ${card(`<p class="text-[16px] leading-[1.35]">Expected at Samfundet</p><p class="text-[#5d6b7c] text-[14px] leading-[1.35]">Monday · 22:00 · main entrance</p><div class="bg-[#dfe5ed] h-px"></div><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">No check-in recorded yet. Try calling Emil before assuming he needs help.</p>`)}
+    ${card(`<div class="flex gap-[12px] items-start">${ic('shield-teal24', 24)}<div class="flex-1 flex flex-col gap-[6px] leading-[1.35]"><p class="text-[16px]">Location not shared</p><p class="text-[#5d6b7c] text-[14px]">Emil hasn’t opted in. His location is not available to buddies.</p></div></div>`, 'bg-[#e7eef7] border-[#e7eef7]')}
+    <div class="flex flex-col gap-[10px]"><p class="font-semibold text-[17px] leading-[1.35]">+47 932 14 607</p>${btn(ic('phone-white18', 18), 'Call Emil', `href="tel:${CONFIG.phones.emil}"`)}${btn(ic('message-circle-teal18', 18), 'Message Emil in Messenger', ext(CONFIG.messenger.emil), true)}</div>`), nav('map')),
+
+  ann: () => {
+    const list = [...S.posts.map(p => ({ id: 'post:' + p.i, av: 'HA', name: 'Henrik Aune', time: p.time, pinned: p.pin, body: p.text, foot: 'Posted ' + p.time })), ...ANN.map(a => ({ ...a, pinned: 1 }))];
+    return scr(topHead('Announcements', 'Buddy and organiser updates for Group 7', avatar(), 13) + body(16, `
+      <a ${ext(CONFIG.messenger.group)} class="bg-[#e7eef7] flex gap-[8px] items-center p-[12px] rounded-[10px]">${ic('external-link16', 16)}<span class="flex-1 font-semibold text-[#00509e] text-[13px] leading-[1.35]">Open Messenger group</span>${ic('arrow-up-right-teal16', 16)}</a>
+      <p class="text-[18px] leading-[1.35]">Board</p>
+      <div class="flex flex-col">${list.map(a => `<button data-go="annd:${a.id}" class="${a.hl ? 'bg-[#fff1d5]' : 'bg-white'} border border-[#dfe5ed] flex gap-[12px] items-start p-[12px] rounded-[12px] w-full text-left">${av(a.av, 44, 14)}
+        <span class="flex-1 min-w-0 flex flex-col gap-[8px] leading-[1.35]"><span class="flex flex-col gap-[4px]"><span class="flex justify-between whitespace-nowrap"><span class="font-semibold text-[14px]">${a.name}</span><span class="text-[#5d6b7c] text-[10px]">${a.time}</span></span>
+        <span class="flex gap-[6px] items-center">${a.pinned ? `<span class="bg-[#e7eef7] px-[8px] py-[4px] rounded-full font-bold text-[#00509e] text-[10px]">Pinned</span>` : ''}${a.upd ? upd() : ''}</span></span>
+        <span class="text-[13px]">${a.body}</span><span class="text-[#5d6b7c] text-[11px]">${a.foot}</span></span></button><div class="bg-[#dfe5ed] h-px w-full"></div>`).join('')}</div>
+      <p class="text-[#5d6b7c] text-[12px] leading-[1.35]">Announcements here. Questions and conversations in Messenger.</p>`), nav('ann'));
+  },
+
+  annd: id => {
+    let a;
+    if (id.startsWith('post:')) { const p = S.posts.find(x => 'post:' + x.i === id); a = { name: 'Henrik Aune', full: p.text, pinned: p.pin, hl: 1 }; }
+    else { const x = ANN.find(x => x.id === id); a = { ...x, full: x.full || x.body, pinned: 1 }; }
+    return scr(backHead('Announcement detail', 'Group 7 · Audience: 10 students') + body(12, `
+      <a ${ext(CONFIG.messenger.group)} class="flex gap-[7px] items-start">${ic('external-link15', 15)}<span class="flex-1 font-semibold text-[#00509e] text-[12px] leading-[1.35]">Open Messenger group for questions and discussion</span></a>
+      <div class="${a.hl ? 'bg-[#fff1d5]' : 'bg-[#f6f8f8] border border-[#dfe5ed]'} flex flex-col gap-[12px] p-[16px] rounded-[10px]">
+        <div class="flex gap-[7px] items-center">${a.pinned ? ic('pin-brown16', 16) : ''}<p class="flex-1 font-semibold text-[12px] leading-[1.35] ${a.hl ? 'text-[#966008]' : ''}">${a.pinned ? 'Pinned announcement · ' : ''}${a.name}</p>${a.upd ? upd() : ''}</div>
+        <p class="text-[13px] leading-[1.35]">${a.full}</p></div>
+      <p class="text-[#5d6b7c] text-[11px] text-center leading-[1.35]">Today · Monday 10 August</p>`), nav('ann'));
+  },
+
+  buddy: who => {
+    const b = BUD[who];
+    return scr(backHead(b.name, 'Your buddy · Group 7') + body(18, `
+      <div class="flex gap-[12px] items-center pb-[8px]">${ph(who === 'sara' ? 'sara' : 'henrik', 48)}<div class="flex-1 flex flex-col gap-[3px] leading-[1.35]"><p class="text-[15px]">Here to help you settle in</p><p class="text-[#5d6b7c] text-[12px]">Questions big or small are welcome.</p></div></div>
+      <div class="bg-[#f6f8f8] border border-[#dfe5ed] flex flex-col gap-[12px] p-[16px] rounded-[20px]">
+        <div class="flex gap-[12px] items-center"><div class="bg-[#e7eef7] flex items-center justify-center rounded-[20px] size-[40px] shrink-0">${ic('message-circle-teal20', 20)}</div><div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[16px]">Conversations happen in Messenger</p><p class="text-[#5d6b7c] text-[13px]">This app is your buddy directory and announcement board. Open Messenger to chat with ${b.short}.</p></div></div>
+        <a ${ext(CONFIG.messenger[who])} class="bg-[#00509e] flex gap-[10px] items-center px-[16px] py-[14px] rounded-full">${ic('message-circle-white18', 18)}<span class="flex-1 font-bold text-[15px] text-white leading-[1.35]">Message ${b.short} in Messenger</span>${ic('arrow-up-right-white16', 16)}</a>
+        <a ${ext(CONFIG.messenger.group)} class="bg-white border border-[#dfe5ed] flex gap-[10px] items-center px-[14px] py-[12px] rounded-full">${ic('users18', 18)}<span class="flex-1 font-semibold text-[14px] leading-[1.35]">Group 7 Messenger shortcut</span>${ic('arrow-up-right-teal16', 16)}</a></div>`), nav('ann'));
+  },
+
+  board: () => {
+    const post = p => `<button data-go="annd:post:${p.i}" class="${p.pin ? 'bg-[#fff1d5]' : 'bg-[#f6f8f8] border border-[#dfe5ed]'} flex flex-col gap-[7px] p-[13px] rounded-[10px] w-full text-left"><span class="flex gap-[7px] items-center w-full">${ic(p.pin ? 'pin-brown16' : 'announcement16', 16)}<span class="flex-1 font-semibold text-[12px] leading-[1.35] ${p.pin ? 'text-[#966008]' : ''}">${p.pin ? 'Pinned · ' : ''}Henrik Aune</span><span class="text-[#5d6b7c] text-[11px]">${p.time}</span></span><span class="text-[13px] leading-[1.35]">${p.text}</span></button>`;
+    return scr(backHead('Announcement board', 'Group 7 · Buddy view', tag('Buddy')) + body(12, `
+      <a ${ext(CONFIG.messenger.group)} class="flex gap-[7px] items-center">${ic('external-link15', 15)}<span class="flex-1 font-semibold text-[#00509e] text-[12px] leading-[1.35]">Open Messenger group</span></a>
+      <div class="bg-[#f6f8f8] border border-[#dfe5ed] flex flex-col gap-[6px] p-[13px] rounded-[10px] text-[13px] leading-[1.35]"><p class="font-semibold">Conversation stays in Messenger</p><p class="text-[#5d6b7c]">Use Messenger for group discussion. This board is for one-way buddy announcements only.</p></div>
+      <button data-go="compose" class="self-start bg-[#e7eef7] flex gap-[8px] h-[38px] items-center px-[12px] rounded-[10px] font-semibold text-[#00509e] text-[13px] whitespace-nowrap">${ic('megaphone18', 18)}New announcement</button>
+      ${S.posts.slice().reverse().map(post).join('')}
+      <button data-go="annd:ha" class="bg-[#fff1d5] flex flex-col gap-[7px] p-[13px] rounded-[10px] text-left"><span class="flex gap-[7px] items-center w-full">${ic('pin-brown16', 16)}<span class="flex-1 font-semibold text-[#966008] text-[12px] leading-[1.35]">Pinned · Henrik Aune</span>${upd()}</span><span class="text-[13px] leading-[1.35]">Pre-party at Henrik’s: 20:00 at Moholt. Time changed: 19:00 → 20:00. Meet outside Herman Krags veg 12.</span></button>
+      <p class="text-[#5d6b7c] text-[11px] text-center leading-[1.35]">Today · Monday 10 August</p>
+      ${[['Sara · Buddy', '09:10', 'Campus tour is at 12:00. Meet at the Gløshaugen main entrance.'], ['Henrik Aune', '09:28', 'Alcohol is optional at tonight’s pre-party. Everyone is welcome at Moholt at 20:00.']].map(([n, t, x]) => `<div class="bg-[#f6f8f8] border border-[#dfe5ed] flex flex-col gap-[7px] p-[13px] rounded-[10px]"><div class="flex gap-[7px] items-center">${ic('announcement16', 16)}<p class="flex-1 font-semibold text-[12px] leading-[1.35]">${n}</p><p class="text-[#5d6b7c] text-[11px]">${t}</p></div><p class="text-[13px] leading-[1.35]">${x}</p></div>`).join('')}`), nav('ann'));
+  },
+
+  compose: () => scr(backHead('New announcement', 'Buddy · Henrik Aune · Group 7') + body(22, `
+    ${card(`<div class="flex gap-[12px] items-center">${av('G7', 42)}<div class="flex-1 flex flex-col gap-[3px] leading-[1.35]"><p class="text-[17px]">To all of Group 7</p><p class="text-[#5d6b7c] text-[13px]">10 students · Henrik Aune</p></div>${ic('users-round-teal22', 22)}</div>`, 'bg-[#e7eef7] border-[#e7eef7]')}
+    <div class="flex flex-col gap-[10px] leading-[1.35]"><p class="text-[16px]">Announcement board post</p>
+      <div class="border-[1.5px] border-[#00509e] flex flex-col h-[225px] justify-between p-[16px] rounded-[18px]"><textarea id="draft" class="flex-1 resize-none text-[17px] leading-[1.35]">${S.draft}</textarea><p id="count" class="text-[#5d6b7c] text-[11px] text-right">${S.draft.length} characters · one-way post</p></div></div>
+    <div class="flex gap-[12px] items-center">${ic('pin-teal22', 22)}<div class="flex-1 flex flex-col gap-[3px] leading-[1.35]"><p class="text-[15px]">Pin to the top of the board</p><p class="text-[#5d6b7c] text-[12px]">Keep this post easy to find on the board.</p></div>${toggle(S.pin, 'pin')}</div>
+    ${card(`<div class="flex gap-[10px] items-start">${ic('megaphone20', 20)}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">This post will appear on the Group 7 announcement board. It will not send a message to Messenger.</p></div>`)}`) +
+    action(btn(ic('send-white', 18), 'Publish announcement', 'data-act="publish"')), nav('ann')),
+
+  published: () => {
+    const p = S.posts[S.posts.length - 1];
+    return scr(backHead('Announcement board', 'Published for Group 7 · 10 students', tag('Buddy')) + body(12, `
+      <a ${ext(CONFIG.messenger.group)} class="flex gap-[7px] items-start">${ic('external-link15', 15)}<span class="flex-1 font-semibold text-[#00509e] text-[12px] leading-[1.35]">Open Messenger group</span></a>
+      <div class="bg-[#e7eef7] flex gap-[8px] items-center p-[10px] rounded-[10px]">${ic('circle-check', 18)}<p class="flex-1 font-semibold text-[#00509e] text-[13px] leading-[1.35]">Published for Group 7</p></div>
+      <div class="${p.pin ? 'bg-[#fff1d5]' : 'bg-[#f6f8f8] border border-[#dfe5ed]'} flex flex-col gap-[7px] p-[13px] rounded-[10px]"><div class="flex gap-[7px] items-center">${ic(p.pin ? 'pin-brown16' : 'announcement16', 16)}<p class="flex-1 font-semibold text-[12px] leading-[1.35] ${p.pin ? 'text-[#966008]' : ''}">${p.pin ? 'Pinned · ' : ''}Henrik Aune</p>${upd()}</div>
+        <p class="text-[13px] leading-[1.35]">${p.text}</p><p class="text-[11px] leading-[1.35] ${p.pin ? 'text-[#966008]' : 'text-[#5d6b7c]'}">Published to Group 7 · ${p.time}</p></div>
+      <p class="text-[#5d6b7c] text-[11px] text-center leading-[1.35]">Published today · Monday 10 August</p>`), nav('ann'));
+  },
+
+  profile: () => {
+    const b = S.role === 'buddy';
+    return scr(backHead('Profile', '', b ? tag('Buddy') : '') + body(16, `
+      <div class="flex gap-[16px] items-center pb-[4px] pt-[8px]">${ph(b ? 'henrik' : 'ingrid', 76)}<div class="flex-1 flex flex-col gap-[5px] items-start leading-[1.35]"><p class="font-bold text-[23px]">${b ? 'Henrik Aune' : 'Ingrid Solberg'}</p><p class="text-[#5d6b7c] text-[13px]">${b ? 'Buddy' : 'New student'} · NTNU Trondheim</p>${tag('Group 7')}</div></div>
+      ${card(`<div class="flex gap-[8px] items-center">${ic('phone-teal18', 18)}<p class="flex-1 font-semibold text-[14px] leading-[1.35]">Phone number</p>${tag('Confirmed')}</div><p class="font-semibold text-[17px] leading-[1.35]">+47 ${b ? '948 26 115' : S.phone}</p><p class="text-[#5d6b7c] text-[12px] leading-[1.35]">${b ? 'Visible to your Group 7 students.' : 'Visible only to your Group 7 buddies.'}</p>`)}
+      ${card(`<p class="text-[16px] leading-[1.35]">Your group · Group 7</p><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${b ? '10 students · Co-buddy Sara Lund' : 'Buddies Henrik Aune and Sara Lund'}</p><a ${ext(CONFIG.messenger.group)} class="font-semibold text-[#00509e] text-[13px] leading-[1.35]">Open Messenger group →</a>`, 'bg-white border-[#dfe5ed]', 7)}
+      ${card(`<div class="flex gap-[10px] items-center">${ic('shield-check22', 22)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[16px]">Share my location</p><p class="text-[#5d6b7c] text-[12px]">${S.share ? 'On · shared with your buddies' : 'Off · private by default'}</p></div>${toggle(S.share, 'share')}</div><div class="bg-[#dfe5ed] h-px"></div>
+        <p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${S.share ? 'Your location is shared with your Group 7 buddies. You can turn it off at any time.' : 'Your location is not shared. You can opt in to share with your buddies, and turn it off at any time. Group meeting points work without sharing.'}</p>`, 'bg-white border-[#dfe5ed]', 12)}
+      <div class="flex flex-col gap-[9px]"><p class="text-[#5d6b7c] text-[11px] leading-[1.35]">TESTING ONLY · VIEW AS</p><div class="bg-[#f6f8f8] flex gap-[4px] h-[44px] p-[4px] rounded-[10px]">${[['student', 'Student'], ['buddy', 'Buddy']].map(([k, l]) => `<button data-act="role:${k}" class="${S.role === k ? 'bg-[#00509e] text-white' : 'text-[#5d6b7c]'} flex-1 flex items-center justify-center rounded-[8px] font-semibold text-[14px] leading-[1.35]">${l}</button>`).join('')}</div></div>
+      <button data-act="logout" class="text-left font-semibold text-[#00509e] text-[14px] leading-[1.35]">Log out of Feide</button>`), nav('home'));
+  },
+};
+
+// ---------- routing & actions ----------
+const app = document.getElementById('app');
+function render() { const [s, p] = [S.screen, S.param]; if (lmap) { S.view = [lmap.getCenter(), lmap.getZoom()]; lmap.remove(); lmap = null; } app.innerHTML = SCREENS[s](p); initMap(); }
+
+// Real map of Trondheim (OpenStreetMap tiles), limited to Norway.
+let lmap = null;
+const PINS = { sam: [63.4223, 10.3953, 'Samfundet · 22:00'], tour: [63.4195, 10.4022, 'Campus tour · 12:00'], pre: [63.4118, 10.4317, 'Pre-party · 20:00'] };
+const NORWAY = [[57.7, 4.0], [71.4, 31.6]];
+function initMap() {
+  const el = document.getElementById('lmap'); if (!el || !window.L) return;
+  lmap = L.map(el, { zoomControl: false, attributionControl: true, maxBounds: NORWAY, maxBoundsViscosity: 1, minZoom: 5, maxZoom: 19, worldCopyJump: false });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, bounds: NORWAY, noWrap: true,
+    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>' }).addTo(lmap);
+  L.control.zoom({ position: 'topright' }).addTo(lmap);
+  L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(lmap);
+  const v = S.focus || S.view; S.focus = null; if (v) lmap.setView(v[0], v[1]); else lmap.fitBounds(Object.values(PINS).map(p => [p[0], p[1]]), { padding: [50, 50] });
+  Object.entries(PINS).forEach(([id, [lat, lng, cap]]) => {
+    const on = S.sel === id || (id === 'tour' && S.sel === 'group');
+    if (id === 'tour' && S.sel === 'group') cap = 'Group 7 · 12:00';
+    const html = `<div class="flex flex-col gap-[4px] items-center" style="transform:translate(-50%,-17px);width:max-content"><span class="${on ? 'bg-[#003c76]' : 'bg-[#00509e]'} border-[3px] border-white flex items-center justify-center rounded-full size-[34px] shadow">${ic('map-pin-white17', 17)}</span><span class="bg-white px-[7px] py-[4px] rounded-[6px] text-[#00509e] text-[10px] leading-[1.35] whitespace-nowrap shadow-sm">${cap}</span></div>`;
+    L.marker([lat, lng], { icon: L.divIcon({ html, className: '', iconSize: [0, 0] }), zIndexOffset: on ? 1000 : 0 }).addTo(lmap)
+      .on('click', () => { S.sel = id; S.focus = [[lat, lng], Math.max(lmap.getZoom(), 15)]; render(); });
+  });
+  lmap.on('click', () => { if (S.sel) { S.sel = null; render(); } });
+  setTimeout(() => lmap && lmap.invalidateSize(), 50);
+}
+function go(target, push = true) {
+  const i = target.indexOf(':'); const s = i < 0 ? target : target.slice(0, i); const p = i < 0 ? null : target.slice(i + 1);
+  if (push) S.stack.push([S.screen, S.param]);
+  S.screen = s; S.param = p; if (s === 'map') S.sel = null; render();
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-go],[data-back],[data-tab],[data-act],[data-pin],[data-mapbg]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.go) return go(d.go);
+  if ('back' in d) { const prev = S.stack.pop(); if (prev) { S.screen = prev[0]; S.param = prev[1]; } else S.screen = 'home'; return render(); }
+  if (d.tab) { S.stack = []; return go(d.tab, false); }
+  if (d.pin) { S.sel = d.pin; return render(); }
+  if ('mapbg' in d) { if (S.sel) { S.sel = null; render(); } return; }
+  const [a, v] = d.act.split(':');
+  if (a === 'day') S.day = +v;
+  else if (a === 'scope') S.scope = v;
+  else if (a === 'chip') S.chips = S.chips.includes(v) ? S.chips.filter(c => c !== v) : [...S.chips, v];
+  else if (a === 'join') S.joined[v] = !S.joined[v];
+  else if (a === 'group') { S.sel = 'group'; S.focus = [[PINS.tour[0], PINS.tour[1]], 16]; }
+  else if (a === 'close') S.sel = null;
+  else if (a === 'share') S.share = !S.share;
+  else if (a === 'pin') S.pin = !S.pin;
+  else if (a === 'role') S.role = v;
+  else if (a === 'logout') { Object.assign(S, { role: 'student', stack: [], joined: {}, share: false }); S.screen = 'login'; }
+  else if (a === 'publish') {
+    const text = S.draft.trim(); if (!text) return document.getElementById('draft').focus();
+    const n = new Date(); S.posts.push({ i: S.posts.length, text: text.replace(/</g, '&lt;'), pin: S.pin, time: String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0') });
+    S.screen = 'published'; S.param = null; return render();
+  }
+  render();
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'draft') { S.draft = e.target.value; document.getElementById('count').textContent = S.draft.length + ' characters · one-way post'; }
+  if (e.target.id === 'phone') { S.phone = e.target.value; document.getElementById('phoneok').style.visibility = S.phone.replace(/\D/g, '').length >= 8 ? '' : 'hidden'; }
+});
+render();
+</script>
+</body>
+</html>
