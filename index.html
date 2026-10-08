@@ -320,7 +320,7 @@ function initMap() {
 }
 function go(target, push = true) {
   const i = target.indexOf(':'); const s = i < 0 ? target : target.slice(0, i); const p = i < 0 ? null : target.slice(i + 1);
-  if (push) S.stack.push([S.screen, S.param]);
+  if (push) { S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); }
   S.screen = s; S.param = p; if (s === 'map') S.sel = null; render();
 }
 document.addEventListener('click', e => {
@@ -328,8 +328,8 @@ document.addEventListener('click', e => {
   if (!el) return;
   const d = el.dataset;
   if (d.go) return go(d.go);
-  if ('back' in d) { const prev = S.stack.pop(); if (prev) { S.screen = prev[0]; S.param = prev[1]; } else S.screen = 'home'; return render(); }
-  if (d.tab) { S.stack = []; return go(d.tab, false); }
+  if ('back' in d) { if (history.state && history.state.app) history.back(); else { S.screen = 'home'; S.param = null; render(); } return; }
+  if (d.tab) { if (S.screen !== d.tab) history.pushState({ app: 1 }, ''); S.stack = []; return go(d.tab, false); }
   if (d.pin) { S.sel = d.pin; return render(); }
   if ('mapbg' in d) { if (S.sel) { S.sel = null; render(); } return; }
   const [a, v] = d.act.split(':');
@@ -353,6 +353,13 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   if (e.target.id === 'draft') { S.draft = e.target.value; document.getElementById('count').textContent = S.draft.length + ' characters · one-way post'; }
   if (e.target.id === 'phone') { S.phone = e.target.value; document.getElementById('phoneok').style.visibility = S.phone.replace(/\D/g, '').length >= 8 ? '' : 'hidden'; }
+});
+// Android / browser back button: step back inside the app instead of leaving the page.
+window.addEventListener('popstate', () => {
+  const prev = S.stack.pop();
+  if (prev) { S.screen = prev[0]; S.param = prev[1]; }
+  else if (S.screen !== 'home' && S.screen !== 'login') { S.screen = 'home'; S.param = null; }
+  render();
 });
 render();
 </script>
