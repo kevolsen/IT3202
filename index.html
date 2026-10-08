@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Buddy Week</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Buddy Week">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -17,6 +25,20 @@
     body { display: block; background: #fff; }
     #app { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
   }
+  /* On a real phone (or installed to the home screen) use the phone's own status bar and home indicator */
+  @media (max-width: 500px) and (pointer: coarse), (display-mode: standalone) {
+    html, body { background: #fff; overscroll-behavior: none; }
+    body { display: block; }
+    #app { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .sb { height: env(safe-area-inset-top, 20px) !important; min-height: 20px; padding: 0 !important; }
+    .sb > * { display: none !important; }
+    .hi { height: max(env(safe-area-inset-bottom), 8px) !important; }
+    .hi > * { display: none !important; }
+    .navbar { height: calc(56px + env(safe-area-inset-bottom)) !important; }
+    .navbar > .absolute { display: none; }
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  button, a { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .noscroll { scrollbar-width: none; } .noscroll::-webkit-scrollbar { display: none; }
   button, a { cursor: pointer; text-align: inherit; font: inherit; color: inherit; }
   textarea, input { font: inherit; color: inherit; outline: none; background: transparent; }
@@ -59,11 +81,11 @@ const ph = (n, s, c = '') => `<img src="assets/${n}.jpg" class="block shrink-0 r
 const tag = (t, c = '') => `<span class="inline-flex shrink-0 bg-[#e7eef7] px-[9px] py-[4px] rounded-[7px] text-[#00509e] text-[11px] font-semibold leading-[1.35] whitespace-nowrap ${c}">${t}</span>`;
 const upd = (t = 'Updated') => `<span class="inline-flex shrink-0 bg-[#fff1d5] px-[9px] py-[4px] rounded-[7px] text-[#966008] text-[11px] font-semibold leading-[1.35] whitespace-nowrap">${t}</span>`;
 const av = (t, s = 28, f = 12) => `<div class="bg-[#e7eef7] flex items-center justify-center rounded-full shrink-0 font-bold text-[#00509e] leading-[1.35]" style="width:${s}px;height:${s}px;font-size:${f}px">${t}</div>`;
-const status = () => `<div class="flex h-[54px] items-center justify-between pl-[30px] pr-[26px] pt-[8px] relative shrink-0">
+const status = () => `<div class="sb flex h-[54px] items-center justify-between pl-[30px] pr-[26px] pt-[8px] relative shrink-0">
   <p class="font-semibold text-[15px] leading-[1.35]">9:41</p>
   <div class="absolute bg-[#0d1622] h-[30px] left-1/2 -translate-x-1/2 rounded-[20px] top-[11px] w-[119px]"></div>
   <div class="flex gap-[5px] items-center">${ic('ios-signal', 18, 16)}${ic('ios-wifi', 17, 16)}${ic('ios-battery', 25, 17)}</div></div>`;
-const homeInd = () => `<div class="flex h-[25px] items-center justify-center shrink-0"><div class="bg-[#14243a] h-[5px] rounded-[5px] w-[134px]"></div></div>`;
+const homeInd = () => `<div class="hi flex h-[25px] items-center justify-center shrink-0"><div class="bg-[#14243a] h-[5px] rounded-[5px] w-[134px]"></div></div>`;
 const avatar = () => `<button data-go="profile" aria-label="Profile">${ph(S.role === 'buddy' ? 'henrik' : 'ingrid', 36)}</button>`;
 const topHead = (title, sub, right = avatar(), subSize = 12) => `<div class="flex gap-[12px] h-[68px] items-center px-[20px] shrink-0">
   <div class="flex-1 min-w-0 flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[28px]">${title}</p><p class="text-[#5d6b7c]" style="font-size:${subSize}px">${sub}</p></div>${right}</div>`;
@@ -78,7 +100,7 @@ const ext = url => `href="${url}" target="_blank" rel="noopener"`;
 const scr = (inner, bottom) => `<div class="bg-white flex flex-col h-full">${status()}${inner}${bottom === undefined ? homeInd() : bottom}</div>`;
 const nav = a => {
   const t = [['home', 'house', 'Home', 'home'], ['events', 'cal', 'Events', 'events'], ['map', 'map', 'Map', S.role === 'buddy' ? 'bmap' : 'map'], ['ann', 'ann', 'Announcements', S.role === 'buddy' ? 'board' : 'ann']];
-  return `<div class="bg-white border-t border-[#dfe5ed] h-[84px] pt-[10px] relative shrink-0"><div class="flex">${t.map(([k, i, l, g]) => `<button data-tab="${g}" class="flex-1 min-w-0 flex flex-col gap-[3px] items-center">${ic(i + (a === k ? '-on' : '-off'), 23)}<span class="text-[11px] leading-[1.35] whitespace-nowrap ${a === k ? 'font-bold text-[#00509e]' : 'font-medium text-[#5d6b7c]'}">${l}</span></button>`).join('')}</div>
+  return `<div class="navbar bg-white border-t border-[#dfe5ed] h-[84px] pt-[10px] relative shrink-0"><div class="flex">${t.map(([k, i, l, g]) => `<button data-tab="${g}" class="flex-1 min-w-0 flex flex-col gap-[3px] items-center">${ic(i + (a === k ? '-on' : '-off'), 23)}<span class="text-[11px] leading-[1.35] whitespace-nowrap ${a === k ? 'font-bold text-[#00509e]' : 'font-medium text-[#5d6b7c]'}">${l}</span></button>`).join('')}</div>
   <div class="absolute bg-[#14243a] bottom-[8px] h-[5px] left-1/2 -translate-x-1/2 rounded-[5px] w-[134px]"></div></div>`;
 };
 const card = (inner, c = 'bg-white border-[#dfe5ed]', gap = 10) => `<div class="border ${c} flex flex-col p-[16px] rounded-[18px] w-full" style="gap:${gap}px">${inner}</div>`;
