@@ -8,7 +8,7 @@ Write-Host "Buddy Week running at http://localhost:8765  (Ctrl+C to stop)"
 while ($true) {
   $client = $server.AcceptTcpClient()
   try {
-    $stream = $client.GetStream()
+    $stream = $client.GetStream(); $stream.ReadTimeout = 2000; $stream.WriteTimeout = 5000
     $reader = New-Object System.IO.StreamReader $stream
     $line = $reader.ReadLine()
     while (($h = $reader.ReadLine()) -ne $null -and $h -ne '') { }

@@ -54,7 +54,7 @@ const CONFIG = {
 };
 const maps = q => 'https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + encodeURIComponent(q);
 
-const S = { role: 'student', screen: 'login', param: null, stack: [], day: 0, scope: 'all', chips: [], joined: {}, sel: null, share: false, pin: true, phone: '412 58 903', posts: [],
+const S = { role: 'student', org: 0, lang: 0, help: false, screen: 'login', param: null, stack: [], day: 0, scope: 'all', chips: [], joined: {}, sel: null, share: false, pin: true, phone: '412 58 903', posts: [],
   draft: 'The pre-party now starts at 20:00 at Moholt, not 19:00. Meet outside Herman Krags veg 12. We’ll head to Samfundet together for 22:00. See you there!' };
 
 const BUD = { henrik: { name: 'Henrik Aune', photo: 'henrik-3', short: 'Henrik' }, sara: { name: 'Sara Lund', photo: 'sara-3', short: 'Sara' } };
@@ -112,8 +112,44 @@ const SCREENS = {
     <div class="flex gap-[10px] items-center pb-[4px] pt-[12px]"><div class="bg-[#00509e] flex items-center justify-center rounded-[14px] size-[44px]">${ic('users-round-white27', 27)}</div><p class="font-bold text-[24px] leading-[1.35]">Buddy Week</p></div>
     <div class="h-[285px] relative overflow-hidden rounded-[18px]"><img src="assets/campus.jpg" class="absolute inset-0 size-full object-cover" alt=""><div class="absolute bg-white bottom-[16px] left-[16px] px-[12px] py-[7px] rounded-[8px] font-semibold text-[12px] leading-[1.35]">NTNU · Trondheim</div></div>
     <div class="flex flex-col gap-[12px] leading-[1.35]"><p class="font-bold text-[34px]">A good start.<br>Together.</p><p class="text-[#5d6b7c] text-[16px]">Your group, your plans and the latest updates. All in one place.</p></div>
-    <div class="flex flex-col gap-[12px] pt-[12px]">${btn(ic('arrow-right-white', 18), 'Log in with Feide', 'data-go="welcome"')}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Use your NTNU account to get started.</p></div>
+    <div class="flex flex-col gap-[12px] pt-[12px]">${btn(ic('arrow-right-white', 18), 'Log in with Feide', 'data-go="feide"')}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Use your NTNU account to get started.</p></div>
     <p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">New here? Meet your group after login.<br>Already set up? <button data-tab="home" class="underline-offset-2 hover:underline">Go straight to Home.</button></p>`, 'pt-[16px]')),
+
+  // Mock Feide login (no credentials are collected — both options just continue)
+  feide: () => {
+    const ORGS = [['NTNU', '#00509e'], ['UiO', '#dd0000'], ['UiB', '#cf3c3a']];
+    const [org, oc] = ORGS[S.org % ORGS.length];
+    const LANGS = ['🇬🇧 English', '🇳🇴 Norsk bokmål'];
+    const nb = S.lang % 2 === 1;
+    const navy = '#1f2a5e';
+    const opt = (icon, label) => `<button data-act="feidego" class="w-full flex items-center gap-[14px] h-[50px] px-[14px] bg-white border-[1.5px] rounded-[2px] text-[15px]" style="border-color:${navy};color:#1b1b1b">${icon}<span class="flex-1 text-center pr-[30px]">${label}</span></button>`;
+    const ms = `<svg width="22" height="22" viewBox="0 0 22 22"><rect width="10" height="10" fill="#f25022"/><rect x="12" width="10" height="10" fill="#7fba00"/><rect y="12" width="10" height="10" fill="#00a4ef"/><rect x="12" y="12" width="10" height="10" fill="#ffb900"/></svg>`;
+    const idp = `<svg width="22" height="22" viewBox="0 0 22 22"><rect width="22" height="22" rx="2" fill="#d9d9d9"/><path d="M6 17V8l2-2v2h2V6l1 -1 1 1v2h2V6l2 2v9h-4v-4h-2v4z" fill="#222"/></svg>`;
+    const feideMark = `<svg width="34" height="40" viewBox="0 0 34 40" fill="none"><path d="M3 38V17a14 14 0 0 1 28 0v21" stroke="${navy}" stroke-width="4"/><path d="M11 38V20a6 6 0 0 1 12 0v18" stroke="${navy}" stroke-width="4"/><circle cx="17" cy="9" r="2.6" fill="${navy}"/></svg>`;
+    return `<div class="bg-white flex flex-col h-full" style="font-family:Inter,system-ui,sans-serif">${status()}
+      <div class="flex-1 min-h-0 overflow-y-auto noscroll flex flex-col bg-[#dce6f2]">
+        <div class="bg-[#c9d7ea] h-[10px] shrink-0"></div>
+        <button data-act="lang" class="self-end flex items-center gap-[8px] px-[18px] h-[40px] text-[14px]" style="color:${navy}">${LANGS[S.lang % 2]}<svg width="14" height="9" viewBox="0 0 14 9"><path d="M1 1l6 6 6-6" stroke="${navy}" stroke-width="2" fill="none"/></svg></button>
+        <div class="bg-white px-[18px] pt-[18px] pb-[22px] flex flex-col gap-[14px] shrink-0">
+          <p class="font-bold text-[26px] text-[#1b1b1b] leading-[1.2]">${nb ? 'Logg inn med Feide' : 'Log in with Feide'}</p>
+          <div class="flex gap-[14px] items-center">${feideMark}<p class="flex-1 text-[14px] text-[#1b1b1b] leading-[1.35]">${nb ? 'Du må logge inn via Feide for å få tilgang til Buddy Week.' : 'You need to log in via Feide to access Buddy Week.'}</p></div>
+          <div class="border-b border-[#c9d7ea] pb-[10px] flex flex-col gap-[8px]">
+            <p class="text-[13px] text-[#1b1b1b]">${nb ? 'Din tilhørighet' : 'Your affiliation'}</p>
+            <div class="flex gap-[14px] items-center"><div class="w-[34px] flex flex-col items-center gap-[2px]"><div class="size-[28px] rounded-[4px] flex items-center justify-center" style="background:${oc}"><div class="size-[14px] bg-white rounded-[2px]"></div></div><span class="text-[8px] font-serif tracking-wide">${org}</span></div>
+              <div class="flex flex-col"><p class="text-[14px] text-[#1b1b1b]">${org}</p><button data-act="org" class="text-left text-[12px] underline text-[#1b1b1b]">${nb ? 'Endre tilhørighet' : 'Change affiliation'}</button></div></div>
+          </div>
+          ${opt(ms, nb ? 'Bruk jobb- eller skolekonto' : 'Use work or school account')}
+          ${opt(idp, nb ? 'Logg inn med ID-porten' : 'Log in using ID-porten')}
+          <div class="border-y border-[#c9d7ea]"><button data-act="help" class="w-full flex items-center justify-between py-[10px] text-[14px] text-[#1b1b1b]">${nb ? 'Trenger du hjelp?' : 'Do you need help?'}<span class="text-[24px] leading-none" style="color:${navy}">${S.help ? '−' : '+'}</span></button>
+            ${S.help ? `<p class="pb-[12px] text-[13px] text-[#444] leading-[1.4]">${nb ? 'Kontakt brukerstøtten ved din institusjon hvis du ikke får logget inn.' : 'Contact the user support at your institution if you are unable to log in.'}</p>` : ''}</div>
+        </div>
+        <div class="flex flex-col items-center gap-[6px] py-[22px] shrink-0 text-[#1b1b1b]">
+          <p class="text-[13px]">${nb ? 'Feide leveres av Sikt' : 'Feide is delivered by Sikt'}</p>
+          <p class="text-[10px]"><a ${ext('https://www.feide.no/')} class="underline">${nb ? 'Vilkår for bruk' : 'Terms of use'}</a> • <a ${ext('https://www.feide.no/')} class="underline">${nb ? 'Personvern og informasjonskapsler' : 'Privacy and cookie information'}</a></p>
+        </div>
+        <div class="flex-1 bg-[#c9d7ea] min-h-[60px]"></div>
+      </div>${homeInd()}</div>`;
+  },
 
   welcome: () => scr(`<div class="flex h-[68px] items-center px-[20px] shrink-0"><div class="flex flex-col gap-[2px] leading-[1.35]"><p class="font-bold text-[28px]">Welcome, Ingrid</p><p class="text-[#5d6b7c] text-[12px]">First login · one-time setup</p></div></div>` +
     body(24, `
@@ -333,7 +369,11 @@ document.addEventListener('click', e => {
   if (d.pin) { S.sel = d.pin; return render(); }
   if ('mapbg' in d) { if (S.sel) { S.sel = null; render(); } return; }
   const [a, v] = d.act.split(':');
-  if (a === 'day') S.day = +v;
+  if (a === 'feidego') return go('welcome');
+  if (a === 'lang') S.lang++;
+  else if (a === 'org') S.org++;
+  else if (a === 'help') S.help = !S.help;
+  else if (a === 'day') S.day = +v;
   else if (a === 'scope') S.scope = v;
   else if (a === 'chip') S.chips = S.chips.includes(v) ? S.chips.filter(c => c !== v) : [...S.chips, v];
   else if (a === 'join') S.joined[v] = !S.joined[v];
