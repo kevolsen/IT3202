@@ -88,6 +88,26 @@ const ANN = [
   { id: 'so', av: 'SO', name: 'Samfundet organisers', time: '08:50', body: 'Doors open at 22:00. Bring photo ID and arrive together from the pre-party.', foot: 'Posted 08:50' },
 ];
 const MEMBERS = [['EB', 'Emil Berg', 0, 'Location not shared · View details →'], ['NV', 'Nora Vik', 1, 'Opted in · at Samfundet · 22:04'], ['IS', 'Ingrid Solberg', 1], ['ML', 'Maja Lien', 1], ['JA', 'Jonas Andersen', 1], ['ON', 'Oskar Nilsen', 0], ['LN', 'Linh Nguyen', 1], ['AD', 'Amalie Dahl', 1], ['AA', 'Ahmed Ali', 1], ['TH', 'Theo Hansen', 1]];
+// Made-up attendee lists, generated the same way every time for each event.
+const FIRST = ['Sofie', 'Lukas', 'Emma', 'Aksel', 'Ingeborg', 'Filip', 'Thea', 'Magnus', 'Ida', 'Sander', 'Hanna', 'Elias', 'Julie', 'Mathias', 'Leah', 'Jakob', 'Mia', 'Noah', 'Aisha', 'Omar', 'Mei', 'Kenji', 'Lucía', 'Mateo', 'Anna', 'Erik', 'Vilde', 'Tobias', 'Selma', 'Adrian', 'Nora', 'Isak', 'Frida', 'Sindre', 'Priya', 'Arjun', 'Zofia', 'Marek'];
+const LAST = ['Hansen', 'Johansen', 'Olsen', 'Larsen', 'Andersen', 'Pedersen', 'Nilsen', 'Kristiansen', 'Jensen', 'Karlsen', 'Berg', 'Haugen', 'Bakken', 'Strand', 'Lie', 'Moen', 'Dahl', 'Lund', 'Solheim', 'Eide', 'Kim', 'Novak', 'García', 'Rossi', 'Patel', 'Ahmed', 'Tanaka', 'Müller'];
+const attendees = k => {
+  const e = EV[k]; let seed = [...k].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296;
+  const g7 = MEMBERS.filter(m => m[0] !== 'IS').map(m => ({ name: m[1], ini: m[0], group: 7 }));
+  const nG7 = Math.min(g7.length, e.going, e.mine ? 9 : Math.max(1, Math.round(e.going * 0.08)));
+  const list = g7.slice().sort(() => rnd() - 0.5).slice(0, nG7);
+  const used = new Set(list.map(p => p.name));
+  while (list.length < e.going) {
+    const f = FIRST[Math.floor(rnd() * FIRST.length)], l = LAST[Math.floor(rnd() * LAST.length)], name = f + ' ' + l;
+    if (used.has(name)) continue; used.add(name);
+    let g = 1 + Math.floor(rnd() * 11); if (g >= 7) g++;
+    list.push({ name, ini: f[0] + l[0], group: g });
+  }
+  list.sort((a, b) => a.name.localeCompare(b.name));
+  if (S.joined[k]) list.unshift({ name: 'Ingrid Solberg', ini: 'IS', group: 7, you: 1 });
+  return list;
+};
 
 // ---------- building blocks ----------
 const ic = (n, w, h = w, c = '') => `<img src="assets/${n}.svg" width="${w}" height="${h}" class="block shrink-0 ${c}" alt="">`;
@@ -232,7 +252,7 @@ const SCREENS = {
       <div class="flex flex-col gap-[4px] leading-[1.35]"><p class="text-[15px]">About</p><p class="text-[#5d6b7c] text-[14px]">${e.about}</p></div>
       <div class="flex gap-[9px] items-center">${ic('backpack', 19)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[14px]">What to bring</p><p class="text-[#5d6b7c] text-[12px]">${e.bring}</p></div></div>
       <div class="flex gap-[10px] items-center"><button data-go="buddy:${e.buddy}">${ph(b.photo, 40)}</button><div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[14px]">${b.name}</p><p class="text-[#5d6b7c] text-[11px]">Responsible buddy</p></div>${smallBtn(ic('message-circle-teal18', 18), 'Messenger', `href="${CONFIG.messenger[e.buddy]}"`)}</div>
-      <div class="flex gap-[7px] items-center">${av('NV')}${av('ML')}${av('JA')}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">${j ? `You + ${e.going} are going` : `${e.going} students are going`}</p></div>`) +
+      <button data-go="going:${k}" class="flex gap-[7px] items-center text-left">${attendees(k).filter(p => !p.you).sort((a, b) => (b.group === 7) - (a.group === 7)).slice(0, 3).map(p => av(p.ini)).join('')}<span class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">${j ? `You + ${e.going} are going` : `${e.going} students are going`}</span>${ic('chevron-right18', 18)}</button>`) +
       action(j ? btn(ic('check-teal', 18), 'You’re going', `data-act="join:${k}"`, true) : btn(ic('plus-white', 18), 'Join', `data-act="join:${k}"`)));
   },
 
@@ -287,6 +307,16 @@ const SCREENS = {
         <div class="flex gap-[7px] items-center">${a.pinned ? ic('pin-brown16', 16) : ''}<p class="flex-1 font-semibold text-[12px] leading-[1.35] ${a.hl ? 'text-[#966008]' : ''}">${a.pinned ? 'Pinned announcement · ' : ''}${a.name}</p>${a.upd ? upd() : ''}</div>
         <p class="text-[13px] leading-[1.35]">${a.full}</p></div>
       <p class="text-[#5d6b7c] text-[11px] text-center leading-[1.35]">Today · Monday 10 August</p>`), nav('ann'));
+  },
+
+  going: k => {
+    const e = EV[k], all = attendees(k), mine = all.filter(p => p.group === 7);
+    const list = S.ascope === 'g7' ? mine : all;
+    return scr(backHead('Who’s going', `${e.title} · ${DAYS[e.d][0]} ${e.t}`) + body(12, `
+      <div class="bg-[#f6f8f8] flex gap-[4px] h-[42px] p-[4px] rounded-[10px]">${[['g7', `Group 7 · ${mine.length}`], ['all', `Everyone · ${all.length}`]].map(([v, l]) => `<button data-act="ascope:${v}" class="${(S.ascope || 'all') === v ? 'bg-white text-[#00509e]' : 'text-[#5d6b7c]'} flex-1 flex items-center justify-center rounded-[7px] font-semibold text-[14px] leading-[1.35]">${l}</button>`).join('')}</div>
+      <div class="flex flex-col">${list.length ? list.map(p => `<div class="flex gap-[10px] items-center py-[8px] border-b border-[#dfe5ed]">${av(p.ini, 36, 13)}<div class="flex-1 min-w-0 flex flex-col leading-[1.35]"><p class="text-[14px]">${p.name}${p.you ? ' (you)' : ''}</p><p class="text-[12px] text-[#5d6b7c]">Group ${p.group}</p></div>${p.group === 7 ? tag('Your group') : ''}</div>`).join('')
+        : `<p class="text-[#5d6b7c] text-[13px] leading-[1.35]">No one from Group 7 has joined yet.</p>`}</div>`) +
+      action(S.joined[k] ? btn(ic('check-teal', 18), 'You’re going', `data-act="join:${k}"`, true) : btn(ic('plus-white', 18), 'Join', `data-act="join:${k}"`)));
   },
 
   buddy: who => {
@@ -387,6 +417,7 @@ document.addEventListener('click', e => {
   if (a === 'lang') S.lang++;
   else if (a === 'org') S.org++;
   else if (a === 'help') S.help = !S.help;
+  else if (a === 'ascope') S.ascope = v;
   else if (a === 'day') S.day = +v;
   else if (a === 'scope') S.scope = v;
   else if (a === 'chip') S.chips = S.chips.includes(v) ? S.chips.filter(c => c !== v) : [...S.chips, v];
