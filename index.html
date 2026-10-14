@@ -88,6 +88,14 @@ const ANN = [
   { id: 'so', av: 'SO', name: 'Samfundet organisers', time: '08:50', body: 'Doors open at 22:00. Bring photo ID and arrive together from the pre-party.', foot: 'Posted 08:50' },
 ];
 const MEMBERS = [['EB', 'Emil Berg', 0, 'Location not shared · View details →'], ['NV', 'Nora Vik', 1, 'Opted in · at Samfundet · 22:04'], ['IS', 'Ingrid Solberg', 1], ['ML', 'Maja Lien', 1], ['JA', 'Jonas Andersen', 1], ['ON', 'Oskar Nilsen', 0], ['LN', 'Linh Nguyen', 1], ['AD', 'Amalie Dahl', 1], ['AA', 'Ahmed Ali', 1], ['TH', 'Theo Hansen', 1]];
+// Made-up shared locations for Group 7 (only shown to buddies; Emil has not opted in).
+const LOC = {
+  NV: [63.42245, 10.39495, 'At Samfundet · updated 22:04'], IS: [63.42215, 10.39585, 'At Samfundet · updated 22:02'],
+  ML: [63.42252, 10.39560, 'At Samfundet · updated 22:01'], JA: [63.42205, 10.39475, 'At Samfundet · updated 22:03'],
+  LN: [63.42260, 10.39445, 'At Samfundet · updated 21:58'], AD: [63.42195, 10.39540, 'At Samfundet · updated 22:05'],
+  AA: [63.42235, 10.39625, 'At Samfundet · updated 22:00'], TH: [63.42190, 10.39600, 'At Samfundet · updated 21:59'],
+  ON: [63.41260, 10.42950, 'Near Moholt · updated 21:48'],
+};
 // Made-up attendee lists, generated the same way every time for each event.
 const FIRST = ['Sofie', 'Lukas', 'Emma', 'Aksel', 'Ingeborg', 'Filip', 'Thea', 'Magnus', 'Ida', 'Sander', 'Hanna', 'Elias', 'Julie', 'Mathias', 'Leah', 'Jakob', 'Mia', 'Noah', 'Aisha', 'Omar', 'Mei', 'Kenji', 'Lucía', 'Mateo', 'Anna', 'Erik', 'Vilde', 'Tobias', 'Selma', 'Adrian', 'Nora', 'Isak', 'Frida', 'Sindre', 'Priya', 'Arjun', 'Zofia', 'Marek'];
 const LAST = ['Hansen', 'Johansen', 'Olsen', 'Larsen', 'Andersen', 'Pedersen', 'Nilsen', 'Kristiansen', 'Jensen', 'Karlsen', 'Berg', 'Haugen', 'Bakken', 'Strand', 'Lie', 'Moen', 'Dahl', 'Lund', 'Solheim', 'Eide', 'Kim', 'Novak', 'García', 'Rossi', 'Patel', 'Ahmed', 'Tanaka', 'Müller'];
@@ -133,7 +141,7 @@ const smallBtn = (icon, text, attrs = '', solid = false) => `<a ${attrs} target=
 const ext = url => `href="${url}" target="_blank" rel="noopener"`;
 const scr = (inner, bottom) => `<div class="bg-white flex flex-col h-full">${status()}${inner}${bottom === undefined ? homeInd() : bottom}</div>`;
 const nav = a => {
-  const t = [['home', 'house', 'Home', 'home'], ['events', 'cal', 'Events', 'events'], ['map', 'map', 'Map', S.role === 'buddy' ? 'bmap' : 'map'], ['ann', 'ann', 'Announcements', S.role === 'buddy' ? 'board' : 'ann']];
+  const t = [['home', 'house', 'Home', 'home'], ['events', 'cal', 'Events', 'events'], ['map', 'map', 'Map', 'map'], ['ann', 'ann', 'Announcements', S.role === 'buddy' ? 'board' : 'ann']];
   return `<div class="navbar bg-white border-t border-[#dfe5ed] h-[84px] pt-[10px] relative shrink-0"><div class="flex">${t.map(([k, i, l, g]) => `<button data-tab="${g}" class="flex-1 min-w-0 flex flex-col gap-[3px] items-center">${ic(i + (a === k ? '-on' : '-off'), 23)}<span class="text-[11px] leading-[1.35] whitespace-nowrap ${a === k ? 'font-bold text-[#00509e]' : 'font-medium text-[#5d6b7c]'}">${l}</span></button>`).join('')}</div>
   <div class="absolute bg-[#14243a] bottom-[8px] h-[5px] left-1/2 -translate-x-1/2 rounded-[5px] w-[134px]"></div></div>`;
 };
@@ -195,7 +203,7 @@ const SCREENS = {
     ${card(`<div class="flex gap-[10px] items-start">${ic('shield-check22', 22)}<p class="flex-1 text-[13px] leading-[1.35]">Your location stays private unless you choose to share it.</p></div>`, 'bg-[#e7eef7] border-[#e7eef7]')}`) +
     action(btn(ic('arrow-right-white', 18), 'Continue to Home', 'data-tab="home"'))),
 
-  home: () => scr(topHead('Hi, Ingrid 👋', 'Monday 10 August · Today') + body(16, `
+  home: () => scr(topHead(`Hi, ${S.role === 'buddy' ? 'Henrik' : 'Ingrid'} 👋`, 'Monday 10 August · Today') + body(16, `
     <div class="bg-[#00509e] flex flex-col gap-[10px] p-[18px] rounded-[18px] leading-[1.35]">
       <p class="font-semibold text-[#cddcee] text-[12px]">NEXT UP · GROUP 7</p>
       <button data-go="event:tour" class="flex gap-[14px] items-center text-white"><span class="font-bold text-[40px]">12:00</span><span class="text-[20px]">Campus tour</span></button>
@@ -209,8 +217,8 @@ const SCREENS = {
       <div class="flex items-center justify-between"><p class="text-[18px]">Later today</p><button data-tab="events" class="font-semibold text-[#00509e] text-[13px]">All events</button></div>
       ${['pre', 'sam'].map(k => `<button data-go="event:${k}" class="flex gap-[14px] items-center py-[6px] text-left"><span class="font-bold text-[19px] w-[66px] shrink-0">${EV[k].t}</span><span class="flex-1 min-w-0 flex flex-col gap-[2px]"><span class="font-semibold text-[15px]">${EV[k].title}</span><span class="text-[#5d6b7c] text-[12px]">${EV[k].place}</span></span>${ic('chevron-right18', 18)}</button>`).join('')}</div>
     <div class="bg-white border border-[#dfe5ed] flex flex-col gap-[9px] p-[14px] rounded-[18px] leading-[1.35]">
-      <button data-go="buddy:henrik" class="flex gap-[10px] items-center text-left">${ph('henrik-2', 34)}${ph('sara-2', 34)}<span class="flex-1 flex flex-col gap-[2px]"><span class="text-[14px]">Your group · Group 7</span><span class="text-[#5d6b7c] text-[11px]">Henrik Aune &amp; Sara Lund</span></span></button>
-      <div class="flex justify-between font-semibold text-[#00509e] text-[13px] whitespace-nowrap"><a ${ext(CONFIG.messenger.group)}>Open in Messenger</a><a ${ext(CONFIG.messenger.henrik)}>Buddy on Messenger</a></div></div>`), nav('home')),
+      <button data-go="group" class="flex gap-[10px] items-center text-left">${ph('henrik-2', 34)}${ph('sara-2', 34)}<span class="flex-1 flex flex-col gap-[2px]"><span class="text-[14px]">Your group · Group 7</span><span class="text-[#5d6b7c] text-[11px]">${S.role === 'buddy' ? '10 students · with Sara Lund' : 'Henrik Aune &amp; Sara Lund · 10 students'}</span></span>${ic('chevron-right18', 18)}</button>
+      <div class="flex justify-between font-semibold text-[#00509e] text-[13px] whitespace-nowrap"><a ${ext(CONFIG.messenger.group)}>Open in Messenger</a>${S.role === 'buddy' ? `<a ${ext(CONFIG.messenger.sara)}>Sara on Messenger</a>` : `<a ${ext(CONFIG.messenger.henrik)}>Buddy on Messenger</a>`}</div></div>`), nav('home')),
 
   events: () => {
     const chip = c => { const on = S.chips.includes(c); return `<button data-act="chip:${c}" class="border ${on ? 'border-[#00509e] bg-[#e7eef7] text-[#00509e]' : 'border-[#dfe5ed] text-[#5d6b7c]'} px-[9px] py-[7px] rounded-full text-[11px] leading-[1.35] whitespace-nowrap shrink-0">${c}</button>`; };
@@ -263,27 +271,47 @@ const SCREENS = {
     const SHEET = { sam: ['Main entrance · Elgeseter gate 1'], pre: ['Herman Krags veg 12 · Moholt'], tour: ['Main building entrance · Gløshaugen'] };
     let sheet = '';
     if (sel === 'group') sheet = `${tag('GROUP 7 · MEETING POINT', 'self-start')}<p class="font-bold text-[20px] leading-[1.35]">Gløshaugen · 12:00</p><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">Campus tour · Main building entrance</p>${travel('600 m · 8 min walk', 'tour')}<p class="text-[#5d6b7c] text-[11px] leading-[1.35]">Set by Sara at 09:15. A meeting point, not live tracking.</p>`;
+    else if (sel && sel.startsWith('stu:')) {
+      const a = sel.slice(4), m = MEMBERS.find(x => x[0] === a), [lat, lng, where] = LOC[a];
+      sheet = `<div class="flex gap-[12px] items-center leading-[1.35]">${av(a, 44, 15)}<div class="flex-1 flex flex-col gap-[2px]"><p class="font-bold text-[20px]">${m[1]}</p><p class="text-[12px] ${m[2] ? 'text-[#5d6b7c]' : 'text-[#966008]'}">${m[2] ? 'Checked in at Samfundet' : 'Not checked in'}</p></div>${tag('Group 7')}</div>
+        <p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${where}</p>
+        <div class="flex gap-[8px]">${smallBtn(ic('phone-teal17', 17), 'Call', `href="tel:${a === 'EB' ? CONFIG.phones.emil : ''}"`)}${smallBtn(ic('navigation-white18', 18), 'Directions', `href="${maps(lat + ',' + lng)}"`, true)}</div>
+        <button data-go="group" class="text-left text-[#5d6b7c] text-[11px] leading-[1.35]">Shared with buddies by opt-in · View group →</button>`;
+    }
     else if (sel) sheet = `<div class="flex gap-[12px] items-center leading-[1.35]"><p class="font-bold text-[#00509e] text-[30px] whitespace-nowrap">${EV[sel].t}</p><p class="flex-1 text-[18px]">${EV[sel].title}</p></div><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${SHEET[sel][0]}</p>${travel(EV[sel].dist, sel)}<button data-go="event:${sel}" class="text-left text-[#5d6b7c] text-[11px] leading-[1.35]">From Hesthagen · View event details →</button>`;
     const content = sel
       ? body(0, `<div class="flex-1 min-h-[430px] relative overflow-hidden flex flex-col">${mapEl}<div class="absolute bg-white border border-[#dfe5ed] bottom-0 left-0 right-0 flex flex-col gap-[10px] p-[18px] rounded-[18px]"><button data-act="close" aria-label="Close" class="bg-[#dfe5ed] h-[4px] rounded-[4px] w-[36px]"></button>${sheet}</div></div>`)
-      : body(12, `<div class="flex gap-[7px] items-center">${ic('map-pin-teal16', 16)}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">3 activities · walks from Hesthagen</p></div>${mapEl}
+      : S.role === 'buddy'
+        ? body(12, `<div class="flex gap-[7px] items-center">${ic('map-pin-teal16', 16)}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">3 activities · ${Object.keys(LOC).length} of ${MEMBERS.length} students sharing location</p></div>${mapEl}
+          ${btn(ic('users-round-teal18', 18), 'Group 7 members', 'data-go="group"', true)}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Students only appear if they’ve opted in to share<br>their location with buddies.</p>`)
+        : body(12, `<div class="flex gap-[7px] items-center">${ic('map-pin-teal16', 16)}<p class="flex-1 text-[#5d6b7c] text-[13px] leading-[1.35]">3 activities · walks from Hesthagen</p></div>${mapEl}
         ${btn(ic('users-round-teal18', 18), 'Where is my group?', 'data-act="group"', true)}<p class="text-[#5d6b7c] text-[12px] text-center leading-[1.35]">Find the group’s meeting point, not people.<br>Your location is not shared.</p>`);
-    return scr(topHead('Map', 'Monday · Today’s activities') + content, nav('map'));
+    return scr(topHead('Map', S.role === 'buddy' ? 'Monday · Activities and Group 7' : 'Monday · Today’s activities') + content, nav('map'));
   },
 
-  bmap: () => scr(topHead('Group check-in', 'Group 7 · Monday evening', tag('Buddy') + avatar()) + body(10, `
+  // Group 7 members. Buddies see check-ins, phone and (opted-in) locations; students only see who is in the group.
+  group: () => {
+    if (S.role !== 'buddy') return scr(backHead('Your group', 'Group 7 · 10 students') + body(10, `
+      <p class="text-[17px] leading-[1.35]">Buddies</p>
+      <div class="flex flex-col gap-px">${['henrik', 'sara'].map(b => `<button data-go="buddy:${b}" class="flex gap-[9px] items-center px-[8px] h-[52px] rounded-[9px] text-left">${ph(b, 36)}<span class="flex-1 text-[14px] leading-[1.35]">${BUD[b].name}</span>${tag('Buddy')}${ic('chevron-right18', 18)}</button>`).join('')}</div>
+      <div class="flex justify-between items-start leading-[1.35] whitespace-nowrap pt-[6px]"><p class="text-[17px]">Group 7 members</p><p class="text-[#5d6b7c] text-[12px]">10 students</p></div>
+      <div class="flex flex-col gap-px">${MEMBERS.map(([a, n]) => `<div class="flex gap-[9px] items-center px-[8px] h-[43px]">${av(a, 30)}<div class="flex-1 min-w-0 flex flex-col gap-px leading-[1.35]"><p class="text-[13px]">${n}${a === 'IS' ? ' (you)' : ''}</p><p class="text-[11px] text-[#5d6b7c]">New student</p></div></div>`).join('')}</div>
+      <a ${ext(CONFIG.messenger.group)} class="bg-[#e7eef7] flex gap-[8px] items-center p-[12px] rounded-[10px]">${ic('external-link16', 16)}<span class="flex-1 font-semibold text-[#00509e] text-[13px] leading-[1.35]">Open Messenger group</span>${ic('arrow-up-right-teal16', 16)}</a>
+      <div class="flex gap-[7px] items-start">${ic('shield-check16', 16)}<p class="flex-1 text-[#5d6b7c] text-[11px] leading-[1.35]">Phone numbers and locations are only visible to your buddies.</p></div>`), nav('home'));
+    return scr(backHead('Group check-in', 'Group 7 · Monday evening', tag('Buddy')) + body(10, `
     <div class="bg-[#e7eef7] flex gap-[12px] items-center p-[12px] rounded-[10px]">${ic('map-pin-teal24', 24)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[16px]">Samfundet · 22:00</p><p class="text-[#5d6b7c] text-[12px]">8 of 10 checked in · 2 still to arrive</p></div></div>
-    <div class="flex justify-between items-start leading-[1.35] whitespace-nowrap"><p class="text-[17px]">Group 7 members</p><p class="text-[#5d6b7c] text-[12px]">10 students</p></div>
+    <div class="flex justify-between items-start leading-[1.35] whitespace-nowrap"><p class="text-[17px]">Group 7 members</p><p class="text-[#5d6b7c] text-[12px]">Tap a name to see location</p></div>
     <div class="flex flex-col gap-px">${MEMBERS.map(([a, n, ok, extra], i) => `<div class="${i === 0 ? 'bg-[#fff1d5]' : 'bg-white'} flex gap-[9px] items-center px-[8px] rounded-[9px]" style="height:${extra ? 59 : 43}px">
-      ${i === 0 ? `<button data-go="contact" class="flex gap-[9px] items-center flex-1 min-w-0 text-left">` : ''}${av(a, 30)}<div class="flex-1 min-w-0 flex flex-col gap-px leading-[1.35]"><p class="text-[13px]">${n}</p><p class="text-[11px] ${ok ? 'text-[#5d6b7c]' : 'text-[#966008]'}">${ok ? 'Checked in at Samfundet' : 'Not checked in'}</p>${extra ? `<p class="text-[10px] ${ok ? 'text-[#00509e]' : 'text-[#5d6b7c]'}">${extra}</p>` : ''}</div>${i === 0 ? '</button>' : ''}
+      <button ${LOC[a] ? `data-act="locate:${a}"` : 'data-go="contact"'} class="flex gap-[9px] items-center flex-1 min-w-0 text-left">${av(a, 30)}<div class="flex-1 min-w-0 flex flex-col gap-px leading-[1.35]"><p class="text-[13px]">${n}</p><p class="text-[11px] ${ok ? 'text-[#5d6b7c]' : 'text-[#966008]'}">${ok ? 'Checked in at Samfundet' : 'Not checked in'}</p>${extra ? `<p class="text-[10px] ${ok ? 'text-[#00509e]' : 'text-[#5d6b7c]'}">${extra}</p>` : ''}</div></button>
       <a href="tel:${i === 0 ? CONFIG.phones.emil : ''}" class="flex flex-col gap-[2px] items-center">${ic('phone-teal17', 17)}<span class="font-semibold text-[#00509e] text-[10px] leading-[1.35]">Call</span></a></div>`).join('')}</div>
-    <div class="flex gap-[7px] items-start">${ic('shield-check16', 16)}<p class="flex-1 text-[#5d6b7c] text-[11px] leading-[1.35]">Check-ins aren’t live tracking. Individual locations are visible only with explicit opt-in.</p></div>`), nav('map')),
+    <div class="flex gap-[7px] items-start">${ic('shield-check16', 16)}<p class="flex-1 text-[#5d6b7c] text-[11px] leading-[1.35]">Check-ins aren’t live tracking. Individual locations are visible only with explicit opt-in.</p></div>`), nav('home'));
+  },
 
   contact: () => scr(backHead('Member details', '', tag('Buddy')) + body(18, `
     <div class="flex flex-col gap-[10px] items-center pt-[10px] leading-[1.35] text-center">${av('EB', 72, 24)}<p class="font-bold text-[28px]">Emil Berg</p><p class="text-[#5d6b7c] text-[14px]">New student · Group 7</p>${upd('Not checked in')}</div>
     ${card(`<p class="text-[16px] leading-[1.35]">Expected at Samfundet</p><p class="text-[#5d6b7c] text-[14px] leading-[1.35]">Monday · 22:00 · main entrance</p><div class="bg-[#dfe5ed] h-px"></div><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">No check-in recorded yet. Try calling Emil before assuming he needs help.</p>`)}
     ${card(`<div class="flex gap-[12px] items-start">${ic('shield-teal24', 24)}<div class="flex-1 flex flex-col gap-[6px] leading-[1.35]"><p class="text-[16px]">Location not shared</p><p class="text-[#5d6b7c] text-[14px]">Emil hasn’t opted in. His location is not available to buddies.</p></div></div>`, 'bg-[#e7eef7] border-[#e7eef7]')}
-    <div class="flex flex-col gap-[10px]"><p class="font-semibold text-[17px] leading-[1.35]">+47 932 14 607</p>${btn(ic('phone-white18', 18), 'Call Emil', `href="tel:${CONFIG.phones.emil}"`)}${btn(ic('message-circle-teal18', 18), 'Message Emil in Messenger', ext(CONFIG.messenger.emil), true)}</div>`), nav('map')),
+    <div class="flex flex-col gap-[10px]"><p class="font-semibold text-[17px] leading-[1.35]">+47 932 14 607</p>${btn(ic('phone-white18', 18), 'Call Emil', `href="tel:${CONFIG.phones.emil}"`)}${btn(ic('message-circle-teal18', 18), 'Message Emil in Messenger', ext(CONFIG.messenger.emil), true)}</div>`), nav('home')),
 
   ann: () => {
     const list = [...S.posts.map(p => ({ id: 'post:' + p.i, av: 'HA', name: 'Henrik Aune', time: p.time, pinned: p.pin, body: p.text, foot: 'Posted ' + p.time })), ...ANN.map(a => ({ ...a, pinned: 1 }))];
@@ -364,7 +392,7 @@ const SCREENS = {
     return scr(backHead('Profile', '', b ? tag('Buddy') : '') + body(16, `
       <div class="flex gap-[16px] items-center pb-[4px] pt-[8px]">${ph(b ? 'henrik' : 'ingrid', 76)}<div class="flex-1 flex flex-col gap-[5px] items-start leading-[1.35]"><p class="font-bold text-[23px]">${b ? 'Henrik Aune' : 'Ingrid Solberg'}</p><p class="text-[#5d6b7c] text-[13px]">${b ? 'Buddy' : 'New student'} · NTNU Trondheim</p>${tag('Group 7')}</div></div>
       ${card(`<div class="flex gap-[8px] items-center">${ic('phone-teal18', 18)}<p class="flex-1 font-semibold text-[14px] leading-[1.35]">Phone number</p>${tag('Confirmed')}</div><p class="font-semibold text-[17px] leading-[1.35]">+47 ${b ? '948 26 115' : S.phone}</p><p class="text-[#5d6b7c] text-[12px] leading-[1.35]">${b ? 'Visible to your Group 7 students.' : 'Visible only to your Group 7 buddies.'}</p>`)}
-      ${card(`<p class="text-[16px] leading-[1.35]">Your group · Group 7</p><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${b ? '10 students · Co-buddy Sara Lund' : 'Buddies Henrik Aune and Sara Lund'}</p><a ${ext(CONFIG.messenger.group)} class="font-semibold text-[#00509e] text-[13px] leading-[1.35]">Open Messenger group →</a>`, 'bg-white border-[#dfe5ed]', 7)}
+      ${card(`<button data-go="group" class="flex items-center justify-between text-left text-[16px] leading-[1.35]">Your group · Group 7${ic('chevron-right18', 18)}</button><p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${b ? '10 students · Co-buddy Sara Lund' : 'Buddies Henrik Aune and Sara Lund'}</p><a ${ext(CONFIG.messenger.group)} class="font-semibold text-[#00509e] text-[13px] leading-[1.35]">Open Messenger group →</a>`, 'bg-white border-[#dfe5ed]', 7)}
       ${card(`<div class="flex gap-[10px] items-center">${ic('shield-check22', 22)}<div class="flex-1 flex flex-col gap-[2px] leading-[1.35]"><p class="text-[16px]">Share my location</p><p class="text-[#5d6b7c] text-[12px]">${S.share ? 'On · shared with your buddies' : 'Off · private by default'}</p></div>${toggle(S.share, 'share')}</div><div class="bg-[#dfe5ed] h-px"></div>
         <p class="text-[#5d6b7c] text-[13px] leading-[1.35]">${S.share ? 'Your location is shared with your Group 7 buddies. You can turn it off at any time.' : 'Your location is not shared. You can opt in to share with your buddies, and turn it off at any time. Group meeting points work without sharing.'}</p>`, 'bg-white border-[#dfe5ed]', 12)}
       <div class="flex flex-col gap-[9px]"><p class="text-[#5d6b7c] text-[11px] leading-[1.35]">TESTING ONLY · VIEW AS</p><div class="bg-[#f6f8f8] flex gap-[4px] h-[44px] p-[4px] rounded-[10px]">${[['student', 'Student'], ['buddy', 'Buddy']].map(([k, l]) => `<button data-act="role:${k}" class="${S.role === k ? 'bg-[#00509e] text-white' : 'text-[#5d6b7c]'} flex-1 flex items-center justify-center rounded-[8px] font-semibold text-[14px] leading-[1.35]">${l}</button>`).join('')}</div></div>
@@ -395,6 +423,12 @@ function initMap() {
     L.marker([lat, lng], { icon: L.divIcon({ html, className: '', iconSize: [0, 0] }), zIndexOffset: on ? 1000 : 0 }).addTo(lmap)
       .on('click', () => { S.sel = id; S.focus = [[lat, lng], Math.max(lmap.getZoom(), 15)]; render(); });
   });
+  if (S.role === 'buddy') Object.entries(LOC).forEach(([a, [lat, lng]]) => {
+    const on = S.sel === 'stu:' + a;
+    const html = `<div style="transform:translate(-50%,-50%);width:max-content"><span class="${on ? 'bg-[#00509e] text-white' : 'bg-[#e7eef7] text-[#00509e]'} border-[2px] ${on ? 'border-white' : 'border-[#00509e]'} flex items-center justify-center rounded-full size-[30px] font-bold text-[11px] shadow">${a}</span></div>`;
+    L.marker([lat, lng], { icon: L.divIcon({ html, className: '', iconSize: [0, 0] }), zIndexOffset: on ? 2000 : 500 }).addTo(lmap)
+      .on('click', () => { S.sel = 'stu:' + a; S.focus = [[lat, lng], Math.max(lmap.getZoom(), 18)]; render(); });
+  });
   lmap.on('click', () => { if (S.sel) { S.sel = null; render(); } });
   setTimeout(() => lmap && lmap.invalidateSize(), 50);
 }
@@ -418,6 +452,10 @@ document.addEventListener('click', e => {
   else if (a === 'org') S.org++;
   else if (a === 'help') S.help = !S.help;
   else if (a === 'ascope') S.ascope = v;
+  else if (a === 'locate') {
+    S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, '');
+    S.screen = 'map'; S.param = null; S.sel = 'stu:' + v; S.focus = [[LOC[v][0], LOC[v][1]], 18];
+  }
   else if (a === 'day') S.day = +v;
   else if (a === 'scope') S.scope = v;
   else if (a === 'chip') S.chips = S.chips.includes(v) ? S.chips.filter(c => c !== v) : [...S.chips, v];
