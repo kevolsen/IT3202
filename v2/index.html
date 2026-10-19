@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Buddy Week</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<meta name="theme-color" content="#f2f2f7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Buddy Week">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --tint: #00509e; --tint-d: #003c76; --tint2: #e6eef8;
+    --bg: #f2f2f7; --card: #fff; --l1: #000; --l2: rgba(60,60,67,.6); --l3: rgba(60,60,67,.3);
+    --sep: rgba(60,60,67,.18); --fill: rgba(118,118,128,.12);
+    --orange: #b84c00; --orange-bg: #fff1e3; --green: #248a3d; --green-bg: #e5f6ea; --red: #d70015;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #dde2ea; color: var(--l1);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { display: flex; align-items: center; justify-content: center; }
+  #app { width: 393px; height: 852px; border-radius: 48px; overflow: hidden; background: var(--bg); position: relative; box-shadow: 0 24px 70px rgba(16,24,40,.22); }
+  @media (max-width: 500px), (max-height: 860px) and (max-width: 900px) {
+    body { display: block; background: var(--bg); }
+    #app { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+  button, a { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; text-align: inherit; cursor: pointer; text-decoration: none; }
+  button, a { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea { font: inherit; color: inherit; border: 0; outline: none; background: transparent; width: 100%; }
+  h1, p { margin: 0; }
+  svg.lucide { flex-shrink: 0; }
+
+  /* Frame */
+  .scr { display: flex; flex-direction: column; height: 100%; position: relative; }
+  .sb { height: 50px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 34px; font-weight: 600; font-size: 16px; position: relative; }
+  .sb .island { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); width: 120px; height: 34px; border-radius: 20px; background: #000; }
+  .sb-r { display: flex; gap: 6px; align-items: center; }
+  .hi { height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .hi::after { content: ''; width: 134px; height: 5px; border-radius: 3px; background: #000; }
+  .scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 12px; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Bars */
+  .tabbar { display: flex; flex-shrink: 0; background: rgba(249,249,249,.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: .5px solid var(--sep); padding: 7px 0 30px; position: relative; }
+  .tabbar::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #000; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; color: #8e8e93; }
+  .tab.on { color: var(--tint); }
+  .navbar { height: 44px; flex-shrink: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 8px; }
+  .nb-back { display: flex; align-items: center; color: var(--tint); font-size: 17px; gap: 0; justify-self: start; max-width: 130px; white-space: nowrap; overflow: hidden; }
+  .nb-title { font-size: 17px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+  .nb-right { justify-self: end; display: flex; gap: 14px; color: var(--tint); padding-right: 8px; }
+
+  /* Type */
+  .lt-wrap { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 4px 16px 12px; }
+  .eyebrow { font-size: 13px; font-weight: 600; color: var(--l2); text-transform: uppercase; letter-spacing: .2px; margin-bottom: 2px; }
+  .lt { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .3px; }
+  .t1 { font-size: 28px; line-height: 34px; font-weight: 700; }
+  .t2 { font-size: 22px; line-height: 28px; font-weight: 700; }
+  .t { font-size: 17px; line-height: 22px; }
+  .hl { font-size: 17px; line-height: 22px; font-weight: 600; }
+  .s { font-size: 15px; line-height: 20px; color: var(--l2); }
+  .f { font-size: 13px; line-height: 18px; color: var(--l2); }
+  .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tint { color: var(--tint); } .l3 { color: var(--l3); } .red { color: var(--red); }
+
+  /* Lists (inset grouped) */
+  .sec { margin: 0 16px 24px; }
+  .sec-h { font-size: 13px; color: var(--l2); text-transform: uppercase; padding: 0 16px 7px; letter-spacing: .1px; }
+  .sec-f { font-size: 13px; line-height: 18px; color: var(--l2); padding: 7px 16px 0; }
+  .list { background: var(--card); border-radius: 12px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; padding-left: 16px; min-height: 44px; text-align: left; }
+  button.row:active, a.row:active, .hero:active { background: #e5e5ea; }
+  .row-b { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 11px 14px 11px 0; min-height: 44px; border-bottom: .5px solid var(--sep); align-self: stretch; }
+  .list > .row:last-child .row-b { border-bottom: 0; }
+  .row-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .para { padding: 12px 16px; font-size: 17px; line-height: 23px; }
+  .ibox { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; background: var(--tint); flex-shrink: 0; }
+  .ibox.o { background: #f08a24; } .ibox.g { background: #34a853; } .ibox.gr { background: #8e8e93; }
+  .time { width: 52px; flex-shrink: 0; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .val { font-size: 17px; color: var(--l2); white-space: nowrap; }
+
+  /* Controls */
+  .btn { height: 50px; border-radius: 14px; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+  .btn.p { background: var(--tint); color: #fff; } .btn.g { background: var(--tint2); color: var(--tint); }
+  .btn.sm { height: 36px; border-radius: 18px; font-size: 15px; padding: 0 16px; width: auto; }
+  .btn:active { opacity: .7; }
+  .pad { padding: 0 16px; }
+  .seg { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; height: 32px; margin: 0 16px 16px; }
+  .seg button { flex: 1; border-radius: 7px; font-size: 13px; font-weight: 500; text-align: center; }
+  .seg .on { background: #fff; font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04); }
+  .switch { width: 51px; height: 31px; border-radius: 16px; background: rgba(120,120,128,.16); position: relative; flex-shrink: 0; transition: background .2s; }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06); transition: transform .2s; }
+  .switch.on { background: var(--tint); } .switch.on::after { transform: translateX(20px); }
+  .circle-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--fill); color: var(--tint); display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+  .circle-btn.on { background: var(--tint); color: #fff; }
+  .cnt { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+  .badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; vertical-align: 1px; }
+  .badge.b { background: var(--tint2); color: var(--tint); } .badge.o { background: var(--orange-bg); color: var(--orange); }
+  .badge.g { background: var(--green-bg); color: var(--green); } .badge.n { background: var(--fill); color: var(--l2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  /* People */
+  .av { border-radius: 50%; background: var(--tint2); color: var(--tint); display: inline-flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+  .ph { border-radius: 50%; object-fit: cover; flex-shrink: 0; display: block; }
+  .stack { display: flex; } .stack > * { border: 2px solid #fff; margin-left: -8px; } .stack > *:first-child { margin-left: 0; }
+  .center { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 8px 16px 20px; }
+  .actions { display: flex; gap: 10px; padding: 0 16px 24px; }
+  .act { flex: 1; background: var(--card); border-radius: 12px; height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tint); font-size: 12px; font-weight: 500; }
+  .act.off { color: var(--l3); pointer-events: none; }
+
+  /* Today */
+  .hero { display: block; margin: 0 16px 24px; background: var(--tint); color: #fff; border-radius: 16px; padding: 16px; }
+  .hero-k { font-size: 13px; font-weight: 600; opacity: .8; text-transform: uppercase; }
+  .hero-t { font-size: 28px; line-height: 34px; font-weight: 700; margin-top: 4px; }
+  .hero-s { font-size: 15px; opacity: .85; margin-top: 2px; }
+  .hero-a { display: flex; gap: 8px; margin-top: 14px; }
+  .hero-a a, .hero-a button { background: rgba(255,255,255,.18); color: #fff; height: 34px; border-radius: 17px; padding: 0 14px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+
+  /* Events */
+  .days { display: flex; gap: 4px; padding: 0 12px 14px; }
+  .day { flex: 1; border-radius: 12px; padding: 6px 0 5px; text-align: center; }
+  .day .d1 { font-size: 12px; font-weight: 600; color: var(--l2); } .day .d2 { font-size: 20px; font-weight: 600; line-height: 25px; }
+  .day .dd { width: 5px; height: 5px; border-radius: 50%; margin: 2px auto 0; background: var(--tint); }
+  .day.on { background: var(--tint); color: #fff; } .day.on .d1 { color: rgba(255,255,255,.8); } .day.on .dd { background: #fff; }
+  .ev-head { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .banner { margin: 0 16px 16px; border-radius: 12px; padding: 12px 14px; display: flex; gap: 10px; align-items: center; font-size: 15px; font-weight: 600; }
+  .banner.o { background: var(--orange-bg); color: var(--orange); }
+
+  /* Map */
+  .mapwrap { flex: 1; min-height: 0; position: relative; }
+  #lmap { position: absolute; inset: 0; z-index: 0; background: #e9e5dc; }
+  .fabs { position: absolute; top: 12px; right: 12px; z-index: 500; background: rgba(255,255,255,.96); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.15); display: flex; flex-direction: column; overflow: hidden; }
+  .fab { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--tint); }
+  .fab + .fab { border-top: .5px solid var(--sep); }
+  .fab.on { background: var(--tint); color: #fff; }
+  .msheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 600; background: rgba(250,250,252,.98); backdrop-filter: blur(20px); border-radius: 14px 14px 0 0; box-shadow: 0 -2px 16px rgba(0,0,0,.1); display: flex; flex-direction: column; max-height: 52%; }
+  .msheet { height: 45%; transition: height .28s cubic-bezier(.2,.8,.2,1); max-height: none; overflow: hidden; }
+  .grab, .mhead, .mgrab, .modal .mnav { touch-action: none; cursor: grab; }
+  .mgrab { padding: 6px 0 0; display: flex; justify-content: center; } .mgrab::after { content: ""; width: 36px; height: 5px; border-radius: 3px; background: rgba(60,60,67,.3); }
+  .modal { transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+  .grab { padding: 6px 0 2px; display: flex; justify-content: center; width: 100%; } .grab::after { content: ''; width: 36px; height: 5px; border-radius: 3px; background: rgba(60,60,67,.3); }
+  .msheet .mbody { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 8px; }
+  .mhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 16px 12px; }
+  .close { width: 30px; height: 30px; border-radius: 50%; background: var(--fill); color: var(--l2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mk { transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: max-content; }
+  .mk-i { width: 32px; height: 32px; border-radius: 50%; background: var(--tint); color: #fff; border: 2.5px solid #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .mk.on .mk-i { background: var(--tint-d); transform: scale(1.2); }
+  .mk-l { margin-top: 3px; background: #fff; border-radius: 6px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: var(--tint); box-shadow: 0 1px 4px rgba(0,0,0,.15); white-space: nowrap; }
+  .mk-s { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--tint); border: 2px solid var(--tint); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+  .mk.on .mk-s { background: var(--tint); color: #fff; border-color: #fff; transform: scale(1.2); }
+  .me { width: 18px; height: 18px; border-radius: 50%; background: #0a84ff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(10,132,255,.2), 0 1px 4px rgba(0,0,0,.3); transform: translate(-50%, -50%); }
+  .leaflet-control-attribution { font-size: 9px; }
+
+  /* Modals, toast */
+  .modal-bg { position: absolute; inset: 0; z-index: 900; background: rgba(0,0,0,.3); display: flex; align-items: flex-end; animation: fade .2s; }
+  .modal { width: 100%; max-height: 93%; background: var(--bg); border-radius: 12px 12px 0 0; display: flex; flex-direction: column; animation: up .28s cubic-bezier(.2,.8,.2,1); }
+  .modal .mnav { height: 56px; flex-shrink: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 16px; }
+  .mnav .l { justify-self: start; color: var(--tint); font-size: 17px; } .mnav .r { justify-self: end; color: var(--tint); font-size: 17px; font-weight: 600; }
+  .mnav .r:disabled { color: var(--l3); }
+  .modal .mscroll { overflow-y: auto; padding-bottom: 34px; scrollbar-width: none; }
+  .toast { position: absolute; z-index: 950; left: 50%; top: 64px; transform: translateX(-50%); background: rgba(28,28,30,.92); color: #fff; padding: 10px 16px; border-radius: 22px; font-size: 15px; font-weight: 500; display: flex; gap: 8px; align-items: center; white-space: nowrap; animation: fade .2s; }
+  @keyframes up { from { transform: translateY(100%); } } @keyframes fade { from { opacity: 0; } }
+
+  .btn:disabled { opacity: .4; pointer-events: none; }
+  .pbtn { position: relative; flex-shrink: 0; display: block; border-radius: 50%; }
+  .gear { position: absolute; right: -3px; bottom: -3px; width: 17px; height: 17px; border-radius: 50%; background: #fff; color: #3c3c43; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .nb-right { align-items: center; }
+  .map-prof { position: absolute; top: 12px; right: 14px; z-index: 550; border-radius: 50%; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+  .map-prof .ph, .map-prof .av { border: 2px solid #fff; }
+  .fabs { top: 66px !important; }
+  .alert-bg { position: absolute; inset: 0; z-index: 1000; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; animation: fade .15s; }
+  .alert { width: 270px; background: rgba(242,242,247,.97); border-radius: 14px; overflow: hidden; text-align: center; }
+  .alert .at { padding: 19px 16px 16px; } .alert .at b { font-size: 17px; display: block; margin-bottom: 4px; } .alert .at p { font-size: 13px; line-height: 18px; }
+  .alert .ab { display: flex; border-top: .5px solid var(--sep); } .alert .ab button { flex: 1; height: 44px; font-size: 17px; color: var(--tint); }
+  .alert .ab button + button { border-left: .5px solid var(--sep); }
+
+  /* Today: next-up block inside the plan card */
+  .next { display: block; width: 100%; padding: 16px; border-bottom: .5px solid var(--sep); text-align: left; position: relative; }
+  .next::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 4px 4px 0; background: var(--tint); }
+  .next .k { font-size: 13px; font-weight: 600; color: var(--tint); text-transform: uppercase; }
+  .next .pills { display: flex; gap: 8px; margin-top: 12px; }
+  .pill { height: 32px; border-radius: 16px; padding: 0 13px; background: var(--tint2); color: var(--tint); font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .pill.on { background: var(--tint); color: #fff; }
+
+  /* Events: modern cards */
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 16px 14px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; height: 38px; padding: 0 15px; border-radius: 19px; background: #fff; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .chip small { font-weight: 500; color: var(--l2); font-size: 13px; }
+  .chip.on { background: var(--tint); color: #fff; } .chip.on small { color: rgba(255,255,255,.75); }
+  .dayh { display: flex; align-items: baseline; gap: 8px; padding: 4px 20px 10px; }
+  .dayh b { font-size: 22px; font-weight: 700; } .dayh span { font-size: 15px; color: var(--l2); }
+  .evlist { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 20px; }
+  .evc { background: #fff; border-radius: 18px; padding: 14px 14px 14px 0; display: flex; gap: 14px; align-items: stretch; box-shadow: 0 1px 3px rgba(0,0,0,.05); cursor: pointer; text-align: left; }
+  .evc:active { background: #f5f5f8; }
+  .evc .tm { width: 66px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: .5px solid var(--sep); }
+  .evc .tm b { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; } .evc .tm span { font-size: 12px; color: var(--l2); margin-top: 1px; }
+  .evc .mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .evc .meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+  .evc .side { display: flex; align-items: center; }
+  .mini > * { width: 22px !important; height: 22px !important; font-size: 9px !important; border-width: 1.5px !important; margin-left: -6px; }
+  .mini > *:first-child { margin-left: 0; }
+
+  /* Events: week strip + agenda */
+  .week { display: flex; justify-content: space-between; padding: 0 12px 14px; }
+  .wk { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 0; }
+  .wk-d { font-size: 12px; font-weight: 600; color: var(--l2); }
+  .wk-n { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; transition: background .15s; }
+  .wk.today .wk-n, .wk.today .wk-d { color: var(--tint); font-weight: 700; }
+  .wk.on .wk-n { background: var(--tint); color: #fff; font-weight: 700; }
+  .wk-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--l3); }
+  .wk.on .wk-dot { background: var(--tint); }
+  .agenda { padding: 0 16px 8px; }
+  .agenda .sec-h { padding-left: 16px !important; }
+  .ag-list { margin-bottom: 22px; }
+  .ag { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px 12px 16px; text-align: left; position: relative; }
+  .ag + .ag::before { content: ''; position: absolute; top: 0; left: 90px; right: 0; border-top: .5px solid var(--sep); }
+  .ag:active { background: #e5e5ea; }
+  .ag-t { width: 46px; flex-shrink: 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ag-bar { width: 4px; align-self: stretch; border-radius: 2px; background: var(--tint); flex-shrink: 0; }
+  .ag-bar.open { background: #c7c7cc; }
+  .ag-m { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ag-title { font-size: 17px; line-height: 22px; font-weight: 600; }
+  .ag-sub { font-size: 14px; line-height: 19px; color: var(--l2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag-going { display: flex; align-items: center; gap: 4px; color: var(--tint); font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .ag-chg { color: var(--orange); background: var(--orange-bg); font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 6px; flex-shrink: 0; }
+  .ag-upd { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin-top: 4px; padding: 2px 8px 2px 6px; border-radius: 6px; background: var(--orange-bg); color: var(--orange); font-size: 13px; font-weight: 600; line-height: 18px; }
+  .next { padding-right: 40px; }
+  .next-chev { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); display: flex; }
+  .fchips { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 16px 14px; }
+  .fchip { height: 30px; padding: 0 10px 0 12px; border-radius: 15px; background: var(--tint2); color: var(--tint); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 48px 32px; }
+  .empty .pill { margin-top: 10px; }
+
+  /* Floating labels: the field name stays visible above what you type */
+  .fl { position: relative; padding: 0 16px; border-bottom: .5px solid var(--sep); }
+  .list > .fl:last-child { border-bottom: 0; }
+  .fl input, .fl textarea { display: block; width: 100%; font-size: 17px; line-height: 22px; padding: 24px 0 8px; border: 0; background: transparent; resize: none; }
+  .fl label { position: absolute; left: 16px; top: 16px; font-size: 17px; line-height: 22px; color: var(--l2); pointer-events: none; transition: top .15s, font-size .15s, color .15s; }
+  .fl input:focus + label, .fl textarea:focus + label, .fl input:not(:placeholder-shown) + label, .fl textarea:not(:placeholder-shown) + label { top: 6px; font-size: 12px; line-height: 16px; font-weight: 600; }
+  .fl input:focus + label, .fl textarea:focus + label { color: var(--tint); }
+  .fl .req { color: var(--red); margin-left: 2px; }
+  .msg-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--tint2); color: var(--tint); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Forms */
+  .fin { padding: 11px 16px; font-size: 17px; line-height: 22px; display: block; width: 100%; border-bottom: .5px solid var(--sep); }
+  .list > .fin:last-child { border-bottom: 0; }
+  .fin::placeholder, textarea::placeholder { color: var(--l3); }
+  select.fin { -webkit-appearance: none; appearance: none; background: transparent; border-left: 0; border-right: 0; border-top: 0; color: var(--tint); }
+  .frow { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 44px; border-bottom: .5px solid var(--sep); }
+  .frow:last-child { border-bottom: 0; }
+  .frow label { font-size: 17px; flex: 1; }
+  .frow input, .frow select { width: auto; text-align: right; color: var(--tint); font-size: 17px; background: transparent; border: 0; -webkit-appearance: none; appearance: none; }
+
+  /* Login */
+  .login { flex: 1; display: flex; flex-direction: column; padding: 24px 24px 8px; gap: 18px; }
+  .login img.hero-img { width: 100%; height: 260px; object-fit: cover; border-radius: 20px; }
+
+  /* Real phone / installed: use the phone's own status bar and home indicator */
+  @media (max-width: 500px) and (pointer: coarse), (display-mode: standalone) {
+    .sb { height: env(safe-area-inset-top, 20px); min-height: 20px; padding: 0; } .sb > * { display: none; }
+    .hi { height: max(env(safe-area-inset-bottom), 8px); } .hi::after { display: none; }
+    .tabbar { padding-bottom: max(env(safe-area-inset-bottom), 8px); } .tabbar::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="data.js"></script>
+<script>
+// ---------- state ----------
+const S = { role: 'student', screen: 'login', param: null, tab: 'today', stack: [], modal: null, toast: null,
+  day: 0, scope: 'all', chips: [], joined: {}, ascope: 'g7', share: false, pin: true, notify: false, pic: {}, alert: null, phone: '', posts: [], draft: '', form: null,
+  msel: null, sheet: 'mid', mlist: 'events', org: 0, lang: 0, help: false };
+const A = '../assets/';
+const ME = { student: [63.4163, 10.4085], buddy: [63.42228, 10.39505] };
+const COORD = { tour: [63.4195, 10.4022], coffee: [63.4290, 10.3870], pre: [63.4118, 10.4317], sam: [63.4223, 10.3953], rebus: [63.4195, 10.4022], cinema: [63.4069, 10.4717],
+  toga: [63.4269, 10.4106], breakfast: [63.4125, 10.4330], pizza: [63.4118, 10.4317], bakklandet: [63.4282, 10.4024], quiz: [63.4157, 10.4048], boat: [63.4339, 10.3925],
+  sports: [63.4069, 10.4717], karaoke: [63.4223, 10.3953], cathedral: [63.4269, 10.3969], bbq: [63.4185, 10.4030], concert: [63.4223, 10.3953], hike: [63.4210, 10.2680],
+  festival: [63.4180, 10.4070], brunch: [63.4125, 10.4330], swim: [63.4387, 10.4006] };
+const MEET = { dest: 'NTNU Hovedbygningen, Høgskoleringen 1, Trondheim', ll: [63.4195, 10.4022] };
+const coord = k => COORD[k] || MEET.ll;
+const TAGS = ['Social', 'Calm', 'Alcohol-free', 'Across groups'];
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const nowTime = () => { const n = new Date(); return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); };
+const dayWord = d => d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : DAYS[d][2];
+const phoneOk = () => S.phone.replace(/\D/g, '').length === 8;
+const formOk = () => { const f = S.form; return !!(f && f.title.trim() && f.venue.trim() && /^\d\d:\d\d$/.test(f.t)); };
+function openEditor(k) {
+  const e = k && EV[k];
+  S.form = e ? { key: k, title: e.title, venue: e.venue, addr: e.addr, d: e.d, t: e.t, about: e.about, bring: e.bring, mine: !!e.mine, tags: e.tags.filter(t => TAGS.includes(t)), announce: false, notify: false, msg: '', del: false }
+    : { key: null, title: '', venue: '', addr: '', d: S.day, t: '18:00', about: '', bring: '', mine: true, tags: [], announce: false, notify: false, msg: '', del: false };
+  openModal('evedit');
+}
+function post(text, ev, pin = true) { S.posts.push({ i: S.posts.length, text: esc(text), pin, time: nowTime(), ev }); }
+function saveEvent() {
+  const f = S.form, d = +f.d;
+  const fields = { title: f.title.trim(), venue: f.venue.trim(), addr: f.addr.trim(), d, t: f.t, about: f.about.trim(), bring: f.bring.trim(), mine: f.mine ? 1 : 0,
+    tags: (f.mine ? ['My group'] : []).concat(f.tags), sub: `${dayWord(d)} · ${f.mine ? 'Group 7' : 'All groups'}${f.tags[0] ? ' · ' + f.tags[0] : ''}` };
+  let key = f.key, msg;
+  if (key) {
+    const e = EV[key], changes = [];
+    if (e.d !== d) changes.push(`Moved to ${DAYS[d][2]}`);
+    if (e.t !== f.t) changes.push(`Time changed: ${e.t} → ${f.t}`);
+    const moved = e.venue !== fields.venue;
+    if (moved) changes.push(`New location: ${fields.venue}`);
+    Object.assign(e, fields);
+    if (moved) { e.place = fields.venue; e.mapName = fields.venue; e.cap = fields.venue; e.dest = `${fields.venue}, ${fields.addr}, Trondheim`; e.dist = ''; }
+    if (changes.length) e.upd = changes.join(' · ');
+    msg = f.msg.trim() || `${e.title}: ${changes.length ? changes.join('. ') : 'details have been updated'}.`;
+  } else {
+    key = 'ev' + Date.now();
+    EV[key] = { ...fields, place: fields.venue, mapName: fields.venue, street: '', cap: fields.venue, dist: '', buddy: 'henrik', going: 0, dest: `${fields.venue}, ${fields.addr}, Trondheim` };
+    msg = f.msg.trim() || `New event: ${fields.title}, ${DAYS[d][2]} ${f.t} at ${fields.venue}.`;
+  }
+  const n = f.key ? goingCount(key) : MEMBERS.length;
+  if (f.announce) post(msg, key);
+  S.form = null; S.modal = null; history.replaceState({ app: 1 }, '');
+  toast(f.announce ? (f.notify && n ? `Posted · ${n} notified` : 'Saved and announced') : (f.key ? 'Changes saved' : 'Event added'));
+  if (!f.key) { S.day = d; return go('event:' + key); }
+  render();
+}
+function deleteEvent() {
+  const f = S.form, e = EV[f.key], n = goingCount(f.key);
+  if (f.announce) post(f.msg.trim() || `Cancelled: ${e.title} (${DAYS[e.d][2]} ${e.t}) will not take place.`);
+  delete EV[f.key]; delete S.joined[f.key];
+  S.posts.forEach(p => { if (p.ev === f.key) p.ev = null; });
+  S.form = null; S.modal = null; S.stack = []; S.tab = 'events'; S.screen = 'events'; S.param = null; history.replaceState({ app: 1 }, '');
+  toast(f.announce && f.notify && n ? `Event deleted · ${n} notified` : 'Event deleted'); render();
+}
+const goingCount = k => EV[k].going + (S.joined[k] ? 1 : 0);
+const TITLES = { today: 'Today', events: 'Events', map: 'Map', group: 'Group 7', event: 'Event', going: 'Who’s Going', board: 'Announcements', annd: 'Announcement', buddy: 'Buddy', member: 'Member' };
+
+// ---------- helpers ----------
+const I = (n, s = 22, c = '') => `<i data-lucide="${n}" class="${c}" style="width:${s}px;height:${s}px"></i>`;
+const photo = (n, s) => `<img src="${A}${n}.jpg" class="ph" style="width:${s}px;height:${s}px" alt="">`;
+const ini = (t, s = 40, fs = 15) => `<span class="av" style="width:${s}px;height:${s}px;font-size:${fs}px">${t}</span>`;
+const badge = (t, k = 'b') => `<span class="badge ${k}">${t}</span>`;
+const sw = (on, act) => `<button class="switch ${on ? 'on' : ''}" data-act="${act}" role="switch" aria-checked="${on}"></button>`;
+const ext = u => `href="${u}" target="_blank" rel="noopener"`;
+const row = ({ lead = '', title, sub = '', right = '', chev = false, attrs = '', tag = 'button', ts = 't', subc = '' }) =>
+  `<${tag} ${attrs} class="row">${lead}<span class="row-b"><span class="row-tx"><span class="${ts}">${title}</span>${sub ? `<span class="s ${subc}">${sub}</span>` : ''}</span>${right}${chev ? I('chevron-right', 18, 'l3') : ''}</span></${tag}>`;
+const sec = (h, rows, f = '') => `<section class="sec">${h ? `<p class="sec-h">${h}</p>` : ''}<div class="list">${rows}</div>${f ? `<p class="sec-f">${f}</p>` : ''}</section>`;
+const ibox = (n, k = '') => `<span class="ibox ${k}">${I(n, 18)}</span>`;
+const isBuddy = () => S.role === 'buddy';
+const me = () => isBuddy() ? { first: 'Henrik', name: 'Henrik Aune', photo: 'henrik', sub: 'Buddy · NTNU Trondheim', phone: '948 26 115' } : { first: 'Ingrid', name: 'Ingrid Solberg', photo: 'ingrid', sub: 'New student · NTNU Trondheim', phone: S.phone };
+const status = () => `<div class="sb"><span>9:41</span><span class="island"></span><span class="sb-r"><img src="${A}ios-signal.svg" alt=""><img src="${A}ios-wifi.svg" alt=""><img src="${A}ios-battery.svg" alt=""></span></div>`;
+const tabbar = () => `<nav class="tabbar">${[['today', 'house', 'Today'], ['events', 'calendar-days', 'Events'], ['map', 'map', 'Map'], ['group', 'users', 'Group']]
+  .map(([k, i, l]) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-tab="${k}">${I(i, 25)}${l}</button>`).join('')}</nav>`;
+const page = (inner, tabs = true) => `<div class="scr">${status()}${inner}${tabs ? tabbar() : '<div class="hi"></div>'}</div>`;
+const large = (title, eyebrow = '', right = '') => `<div class="lt-wrap"><div>${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ''}<h1 class="lt">${title}</h1></div>${right}</div>`;
+const backLabel = () => { const p = S.stack[S.stack.length - 1]; return p ? (p[0] === 'event' ? 'Event' : TITLES[p[0]] || 'Back') : 'Back'; };
+const navbar = (title = '', right = '') => `<div class="navbar"><button data-back class="nb-back">${I('chevron-left', 28)}<span>${backLabel()}</span></button><span class="nb-title">${title}</span><span class="nb-right">${right}${profileBtn(32)}</span></div>`;
+// Your own picture: default photo, a custom upload, or initials if removed
+const myPic = s => {
+  const p = S.pic[S.role];
+  if (p === null) return ini(me().name.split(' ').map(x => x[0]).join(''), s, Math.round(s * .38));
+  return `<img src="${p || A + me().photo + '.jpg'}" class="ph" style="width:${s}px;height:${s}px" alt="">`;
+};
+// Account button: shown top-right on every in-app page
+const profileBtn = (s = 36) => `<button data-modal="profile" class="pbtn" aria-label="Account and settings">${myPic(s)}<span class="gear">${I('settings', 11)}</span></button>`;
+const evRow = k => { const e = EV[k]; return row({ attrs: `data-go="event:${k}"`, lead: `<span class="time">${e.t}</span>`, title: e.title, sub: e.place + (e.upd ? ' · <span style="color:var(--orange)">Time changed</span>' : ''), right: S.joined[k] ? I('circle-check', 20, 'tint') : '', chev: true }); };
+const annList = () => [...S.posts.slice().reverse().map(p => ({ id: 'post:' + p.i, av: 'HA', name: 'Henrik Aune', time: p.time, text: p.text, pinned: p.pin, ev: p.ev })), ...ANN.map(a => ({ ...a, text: (a.full || a.body).replace(/<br>/g, ' '), pinned: 1 }))];
+const annRow = a => row({ attrs: `data-go="annd:${a.id}"`, lead: ini(a.av, 40, 14), title: `<span style="display:flex;justify-content:space-between;gap:8px"><span class="hl">${a.name}</span><span class="f">${a.time}</span></span>`, sub: `<span class="clamp2">${a.text}</span>`, chev: false });
+
+// ---------- screens ----------
+const SCREENS = {
+  login: () => page(`<div class="login">
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px"><img src="../icon-192.png" width="52" height="52" style="border-radius:12px" alt=""><span class="t2">Buddy Week</span></div>
+      <img class="hero-img" src="${A}campus.jpg" alt="Students walking on the NTNU campus">
+      <div><h1 class="t1">A good start.<br>Together.</h1><p class="s" style="margin-top:8px;font-size:17px;line-height:23px">Your group, your plans and the latest updates — all in one place.</p></div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><button class="btn p" data-go="feide">Continue with Feide</button><p class="f" style="text-align:center">Use your NTNU account to sign in.</p></div>
+    </div>`, false),
+
+  // Mock Feide login (no credentials are collected — both options just continue)
+  feide: () => {
+    const navy = '#1f2a5e', orgs = ['NTNU', 'UiO', 'UiB'], org = orgs[S.org % 3], nb = S.lang % 2 === 1;
+    const opt = (icon, label) => `<button data-act="feidego" style="width:100%;display:flex;align-items:center;gap:14px;height:50px;padding:0 14px;background:#fff;border:1.5px solid ${navy};border-radius:2px;font-size:15px;color:#1b1b1b">${icon}<span style="flex:1;text-align:center;padding-right:30px">${label}</span></button>`;
+    const ms = `<svg width="22" height="22" viewBox="0 0 22 22"><rect width="10" height="10" fill="#f25022"/><rect x="12" width="10" height="10" fill="#7fba00"/><rect y="12" width="10" height="10" fill="#00a4ef"/><rect x="12" y="12" width="10" height="10" fill="#ffb900"/></svg>`;
+    const idp = `<svg width="22" height="22" viewBox="0 0 22 22"><rect width="22" height="22" rx="2" fill="#d9d9d9"/><path d="M6 17V8l2-2v2h2V6l1-1 1 1v2h2V6l2 2v9h-4v-4h-2v4z" fill="#222"/></svg>`;
+    const mark = `<svg width="34" height="40" viewBox="0 0 34 40" fill="none"><path d="M3 38V17a14 14 0 0 1 28 0v21" stroke="${navy}" stroke-width="4"/><path d="M11 38V20a6 6 0 0 1 12 0v18" stroke="${navy}" stroke-width="4"/><circle cx="17" cy="9" r="2.6" fill="${navy}"/></svg>`;
+    return `<div class="scr" style="background:#dce6f2;font-family:Inter,system-ui,sans-serif">${status()}<div class="scroll" style="padding:0">
+      <div style="background:#c9d7ea;height:10px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 12px 0 6px">${`<button data-back style="display:flex;align-items:center;color:${navy};font-size:14px;height:40px">${I('chevron-left', 22)}Back</button>`}<button data-act="lang" style="height:40px;font-size:14px;color:${navy}">${nb ? '🇳🇴 Norsk bokmål' : '🇬🇧 English'} ▾</button></div>
+      <div style="background:#fff;padding:18px 18px 22px;display:flex;flex-direction:column;gap:14px">
+        <p style="font-weight:700;font-size:26px;color:#1b1b1b">${nb ? 'Logg inn med Feide' : 'Log in with Feide'}</p>
+        <div style="display:flex;gap:14px;align-items:center">${mark}<p style="font-size:14px;line-height:1.35">${nb ? 'Du må logge inn via Feide for å få tilgang til Buddy Week.' : 'You need to log in via Feide to access Buddy Week.'}</p></div>
+        <div style="border-bottom:1px solid #c9d7ea;padding-bottom:10px"><p style="font-size:13px;margin-bottom:6px">${nb ? 'Din tilhørighet' : 'Your affiliation'}</p><p style="font-size:14px">${org}</p><button data-act="org" style="font-size:12px;text-decoration:underline">${nb ? 'Endre tilhørighet' : 'Change affiliation'}</button></div>
+        ${opt(ms, nb ? 'Bruk jobb- eller skolekonto' : 'Use work or school account')}${opt(idp, nb ? 'Logg inn med ID-porten' : 'Log in using ID-porten')}
+        <div style="border-top:1px solid #c9d7ea;border-bottom:1px solid #c9d7ea"><button data-act="help" style="width:100%;display:flex;justify-content:space-between;padding:10px 0;font-size:14px">${nb ? 'Trenger du hjelp?' : 'Do you need help?'}<span style="color:${navy};font-size:20px;line-height:1">${S.help ? '−' : '+'}</span></button>${S.help ? `<p style="font-size:13px;color:#444;padding-bottom:12px">${nb ? 'Kontakt brukerstøtten ved din institusjon.' : 'Contact the user support at your institution.'}</p>` : ''}</div>
+      </div>
+      <div style="text-align:center;padding:22px 0;font-size:13px">${nb ? 'Feide leveres av Sikt' : 'Feide is delivered by Sikt'}<br><a ${ext('https://www.feide.no/')} style="font-size:10px;text-decoration:underline">${nb ? 'Vilkår for bruk' : 'Terms of use'}</a></div>
+    </div><div class="hi"></div></div>`;
+  },
+
+  welcome: () => page(`<div class="scroll">${large('You’re in Group 7', 'Welcome, Ingrid')}
+      <p class="pad s" style="font-size:17px;line-height:23px;margin:-4px 0 18px">Meet your buddies. They’ll help you settle in and find your way.</p>
+      <div style="display:flex;gap:12px;padding:0 16px 24px">${['henrik', 'sara'].map(b => `<div style="flex:1;background:#fff;border-radius:16px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px">${photo(b, 72)}<span class="hl">${BUD[b].name}</span><span class="f">Your buddy</span></div>`).join('')}</div>
+      ${sec('Your phone number (required)', `<label class="row"><span class="row-b"><span class="t" style="color:var(--l2)">+47</span><input id="phone" inputmode="tel" autocomplete="tel" placeholder="8-digit number" value="${esc(S.phone)}" class="t" aria-label="Phone number"><span id="phoneok" style="${phoneOk() ? '' : 'visibility:hidden'}">${I('check', 20, 'tint')}</span></span></label>`, 'Only your buddies can see your number, so they can reach you if needed.')}
+      ${sec('Location', row({ tag: 'div', lead: ibox('navigation'), title: 'Share my location', sub: 'With your buddies Henrik and Sara', right: sw(S.share, 'share') }), 'Off by default. You can change this any time from the Map. Meeting points work without sharing.')}
+    </div><div class="pad" style="padding-bottom:8px"><button class="btn p" id="startbtn" data-act="start" ${phoneOk() ? '' : 'disabled'}>Continue</button><p class="f" id="phonehint" style="text-align:center;margin-top:6px;${phoneOk() ? 'visibility:hidden' : ''}">Enter your phone number to continue</p></div>`, false),
+
+  today: () => {
+    const b = isBuddy();
+    const plan = Object.keys(EV).filter(k => EV[k].d === 0 && (EV[k].mine || S.joined[k]) && EV[k].t >= '09:41').sort((x, y) => EV[x].t.localeCompare(EV[y].t));
+    const [nk, ...rest] = plan, nx = nk && EV[nk];
+    const changes = Object.keys(EV).filter(k => EV[k].upd && EV[k].d <= 1).map(k => row({ attrs: `data-go="event:${k}"`, lead: ibox('clock', 'o'), title: EV[k].title, sub: EV[k].upd, chev: true }))
+      .concat(S.posts.slice(-1).map(p => row({ attrs: `data-go="annd:post:${p.i}"`, lead: ibox('megaphone'), title: 'New announcement', sub: `<span class="clamp2">${p.text}</span>`, chev: true })));
+    const nextBlock = nx ? `<div class="next" data-go="event:${nk}" role="button"><span class="next-chev">${I('chevron-right', 18, 'l3')}</span><p class="k">Next up · ${nx.t}</p><p class="t2" style="margin-top:2px">${nx.title}</p><p class="s">${nx.venue}${nx.dist ? ' · ' + nx.dist.split(' · ').pop() : ''}</p>
+        <div class="pills"><a class="pill" ${ext(maps(nx.dest))}>${I('navigation', 15)}Directions</a><button class="pill" data-act="showmap:${nk}">${I('map', 15)}Map</button></div></div>` : '';
+    return page(`<div class="scroll">${large(`Hi, ${me().first}`, 'Monday 10 August', profileBtn())}
+      ${changes.length ? sec('Changes', changes.join('')) : ''}
+      ${sec('Today’s plan', (nextBlock || row({ tag: 'div', title: '<span style="color:var(--l2)">Nothing else planned today</span>' })) + rest.map(evRow).join('') + row({ attrs: 'data-tab="events"', title: '<span class="tint">See All Events</span>', chev: true }))}
+      ${b ? sec('Tonight', row({ attrs: 'data-tab="group"', lead: ibox('users', 'g'), title: 'Check-in at Samfundet', sub: '8 of 10 arrived · 2 still missing', chev: true })) : ''}
+    </div>`);
+  },
+
+  events: () => {
+    const n = S.chips.length, b = isBuddy();
+    const match = k => (S.scope === 'all' || EV[k].mine) && S.chips.every(c => EV[k].tags.includes(c));
+    const list = d => Object.keys(EV).filter(k => EV[k].d === d && match(k)).sort((a, x) => EV[a].t.localeCompare(EV[x].t));
+    const items = list(S.day), D = DAYS[S.day];
+    const parts = [['Morning', k => EV[k].t < '12:00'], ['Afternoon', k => EV[k].t >= '12:00' && EV[k].t < '17:00'], ['Evening', k => EV[k].t >= '17:00']];
+    const agRow = k => {
+      const e = EV[k], j = !!S.joined[k], g = goingCount(k);
+      const right = j ? `<span class="ag-going">${I('circle-check', 18)}Going</span>` : '';
+      return `<button class="ag" data-go="event:${k}"><span class="ag-t">${e.t}</span><span class="ag-bar ${e.mine ? '' : 'open'}"></span>
+        <span class="ag-m"><span class="ag-title">${e.title}</span><span class="ag-sub">${e.place}${g ? ` · ${g} going` : ''}${e.mine ? '' : ' · Open to all'}</span>${e.upd ? `<span class="ag-upd">${I('clock', 13)}${e.upd}</span>` : ''}</span>${right}${I('chevron-right', 17, 'l3')}</button>`;
+    };
+    const agenda = parts.map(([label, f]) => { const ks = items.filter(f); return ks.length ? `<p class="sec-h" style="padding:0 32px 7px">${label}</p><div class="list ag-list">${ks.map(agRow).join('')}</div>` : ''; }).join('');
+    return page(`<div class="scroll">${large('Events', '10–16 August', `<div style="display:flex;gap:10px">${b ? `<button data-act="newev" class="circle-btn" aria-label="New event">${I('plus', 20)}</button>` : ''}<button data-modal="filters" class="circle-btn ${n ? 'on' : ''}" aria-label="Filters">${I('sliders-horizontal', 18)}${n ? `<span class="cnt">${n}</span>` : ''}</button>${profileBtn()}</div>`)}
+      <div class="week" role="tablist" aria-label="Day">${DAYS.map(([d, num], i) => { const has = Object.keys(EV).some(k => EV[k].d === i && match(k)); return `<button role="tab" aria-selected="${i === S.day}" data-act="day:${i}" class="wk ${i === S.day ? 'on' : ''} ${i === 0 ? 'today' : ''}"><span class="wk-d">${d.slice(0, 1)}</span><span class="wk-n">${num}</span><span class="wk-dot" style="${has ? '' : 'visibility:hidden'}"></span></button>`; }).join('')}</div>
+      <div class="seg">${[['all', 'All Events'], ['mine', 'Group 7']].map(([k, l]) => `<button data-act="scope:${k}" class="${S.scope === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="dayh"><b>${dayWord(S.day)}</b><span>${S.day > 1 ? '' : D[2] + ' '}${D[1]} August</span></div>
+      ${n ? `<div class="fchips">${S.chips.map(c => `<button class="fchip" data-act="chip:${c}" aria-label="Remove filter ${c}">${c}${I('x', 13)}</button>`).join('')}</div>` : ''}
+      ${items.length ? `<div class="agenda">${agenda}</div>` : `<div class="empty">${I('calendar-x', 40, 'l3')}<p class="hl">No events</p><p class="s">${n ? 'Nothing matches your filters on this day.' : 'Nothing planned for this day yet.'}</p>${n ? '<button class="pill" data-act="reset">Clear Filters</button>' : ''}</div>`}
+    </div>`);
+  },
+
+  event: k => {
+    const e = EV[k], j = !!S.joined[k], b = BUD[e.buddy], att = attendees(k).filter(p => !p.you).sort((x, y) => (y.group === 7) - (x.group === 7));
+    return page(`${navbar('', isBuddy() ? `<button data-act="editev:${k}" style="font-size:17px">Edit</button>` : '')}<div class="scroll">
+      <div class="ev-head"><p class="eyebrow">${DAYS[e.d][2]} ${DAYS[e.d][1]} August · ${e.t}</p><h1 class="t1">${e.title}</h1><div class="tags">${e.mine ? badge('Group 7') : ''}${e.tags.filter(t => t !== 'My group').map(t => badge(t, 'n')).join('')}</div></div>
+      ${e.upd ? `<div class="banner o">${I('clock', 18)}<span>${e.upd}</span></div>` : ''}
+      <div class="pad" style="margin-bottom:24px"><button data-act="join:${k}" class="btn ${j ? 'g' : 'p'}">${j ? I('check', 20) + 'You’re Going' : 'Join'}</button>${j ? '<p class="f" style="text-align:center;margin-top:6px">Tap again to cancel</p>' : ''}</div>
+      ${sec('', row({ attrs: `data-go="going:${k}"`, lead: `<span class="stack">${att.slice(0, 3).map(p => ini(p.ini, 32, 11)).join('')}</span>`, title: j ? (e.going ? `You and ${e.going} others` : 'Just you so far') : (e.going ? `${e.going} going` : 'No one yet'), sub: 'See who’s going', chev: true }))}
+      ${sec('Where', row({ attrs: `data-act="showmap:${k}"`, lead: ibox('map-pin'), title: e.venue, sub: e.addr, chev: true })
+        + row({ tag: 'a', attrs: ext(maps(e.dest)), lead: ibox('navigation', 'g'), title: 'Directions', sub: e.dist ? e.dist + ' from Hesthagen' : 'Open in Maps', right: I('arrow-up-right', 18, 'l3') }))}
+      ${e.about ? sec('About', `<p class="para">${e.about}</p>`) : ''}
+      ${e.bring ? sec('What to bring', `<p class="para">${e.bring}</p>`) : ''}
+      ${sec('Responsible buddy', row({ tag: 'a', attrs: ext(CONFIG.messenger[e.buddy]), lead: photo(b.photo, 36), title: b.name, sub: 'Message on Messenger', right: I('message-circle', 20, 'tint') }))}
+    </div>`);
+  },
+
+  going: k => {
+    const e = EV[k], all = attendees(k), mine = all.filter(p => p.group === 7), list = S.ascope === 'g7' ? mine : all;
+    return page(`${navbar('Who’s Going')}<div class="scroll"><p class="f" style="text-align:center;padding:0 16px 12px">${e.title} · ${DAYS[e.d][0]} ${e.t}</p>
+      <div class="seg">${[['g7', `Group 7 (${mine.length})`], ['all', `Everyone (${all.length})`]].map(([v, l]) => `<button data-act="ascope:${v}" class="${S.ascope === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${sec('', list.length ? list.map(p => isBuddy() && !p.you
+        ? row({ attrs: `data-act="person:${p.ini}|${p.group}|${encodeURIComponent(p.name)}"`, lead: ini(p.ini, 36, 13), title: p.name, sub: 'Group ' + p.group + (p.group === 7 && LOC[p.ini] ? ' · Sharing location' : ''), chev: true })
+        : row({ tag: 'div', lead: ini(p.ini, 36, 13), title: p.name + (p.you ? ' ' + badge('You') : ''), sub: 'Group ' + p.group })).join('') : row({ tag: 'div', title: '<span style="color:var(--l2)">No one from Group 7 yet</span>' }))}
+    </div>`);
+  },
+
+  map: () => {
+    const b = isBuddy(), sel = S.msel, today = Object.keys(EV).filter(k => EV[k].d === 0).sort((x, y) => EV[x].t.localeCompare(EV[y].t));
+    let head = '', bodyHtml = '';
+    if (sel && sel.startsWith('ev:')) {
+      const k = sel.slice(3), e = EV[k];
+      head = `<div><p class="eyebrow">${DAYS[e.d][0]} ${e.t}</p><p class="t2">${e.title}</p><p class="s">${e.venue}</p></div><button data-act="mclose" class="close" aria-label="Close">${I('x', 16)}</button>`;
+      bodyHtml = `<div class="pad" style="display:flex;gap:8px;padding-bottom:10px"><a class="btn p sm" ${ext(maps(e.dest))}>${I('navigation', 16)}Directions</a><button class="btn g sm" data-go="event:${k}">Details</button></div><p class="f pad">${e.dist} from Hesthagen</p>`;
+    } else if (sel === 'meet') {
+      head = `<div><p class="eyebrow">Group 7 meeting point</p><p class="t2">Gløshaugen · 12:00</p><p class="s">Campus tour · Main building entrance</p></div><button data-act="mclose" class="close" aria-label="Close">${I('x', 16)}</button>`;
+      bodyHtml = `<div class="pad" style="display:flex;gap:8px;padding-bottom:10px"><a class="btn p sm" ${ext(maps(MEET.dest))}>${I('navigation', 16)}Directions</a></div><p class="f pad">Set by Sara at 09:15. A meeting point — not live tracking.</p>`;
+    } else if (sel === 'me') {
+      head = `<div><p class="t2">You</p><p class="s">${b ? 'Shared with Group 7' : 'Shared with Henrik and Sara'}</p></div><button data-act="mclose" class="close" aria-label="Close">${I('x', 16)}</button>`;
+      bodyHtml = `<div class="pad"><button class="btn g sm" data-modal="share">Location Sharing…</button></div>`;
+    } else if (sel && sel.startsWith('stu:')) {
+      const a = sel.slice(4), m = MEMBERS.find(x => x[0] === a);
+      head = `<div style="display:flex;gap:12px;align-items:center">${ini(a, 44)}<div><p class="t2">${m[1]}</p><p class="s">${LOC[a][2]}</p></div></div><button data-act="mclose" class="close" aria-label="Close">${I('x', 16)}</button>`;
+      bodyHtml = `<div class="pad" style="display:flex;gap:8px"><a class="btn p sm" href="tel:">${I('phone', 16)}Call</a><a class="btn g sm" ${ext(CONFIG.messenger.group)}>${I('message-circle', 16)}Message</a><button class="btn g sm" data-go="member:${a}">Profile</button></div>`;
+    } else {
+      head = `<div><p class="t2">${b && S.mlist === 'group' ? 'Group 7' : 'Today'}</p><p class="f">${b && S.mlist === 'group' ? `${Object.keys(LOC).length} of ${MEMBERS.length} sharing location` : `${today.length} events · Monday 10 August`}</p></div>`;
+      const evRows = (b ? '' : row({ attrs: 'data-act="meet"', lead: ibox('users', 'g'), title: 'Where is my group?', sub: 'Meeting point · Gløshaugen 12:00', chev: true }))
+        + today.map(k => row({ attrs: `data-act="msel:ev:${k}"`, lead: `<span class="time">${EV[k].t}</span>`, title: EV[k].title, sub: EV[k].place, chev: true })).join('');
+      const grpRows = MEMBERS.map(([a, n]) => LOC[a]
+        ? row({ attrs: `data-act="msel:stu:${a}"`, lead: ini(a, 36, 13), title: n, sub: LOC[a][2], chev: true })
+        : row({ attrs: `data-go="member:${a}"`, lead: ini(a, 36, 13), title: n, sub: 'Not sharing location', subc: '', chev: true })).join('');
+      bodyHtml = (b ? `<div class="seg">${[['events', 'Events'], ['group', 'Group 7']].map(([k, l]) => `<button data-act="mlist:${k}" class="${S.mlist === k ? 'on' : ''}">${l}</button>`).join('')}</div>` : '')
+        + sec('', b && S.mlist === 'group' ? grpRows : evRows);
+    }
+    return page(`<div class="mapwrap"><div id="lmap"></div><div class="map-prof">${profileBtn(40)}</div>
+      <div class="fabs"><button class="fab ${S.share ? 'on' : ''}" data-modal="share" aria-label="Location sharing">${I(S.share ? 'navigation' : 'navigation-off', 20)}</button><button class="fab" data-act="recenter" aria-label="Show all">${I('locate-fixed', 20)}</button></div>
+      <div class="msheet" style="height:${SHEET_H[S.sheet]}"><button class="grab" aria-label="Drag to resize"></button><div class="mhead">${head}</div><div class="mbody">${bodyHtml}</div></div>
+    </div>`);
+  },
+
+  group: () => {
+    const b = isBuddy(), anns = annList().slice(0, 2), checked = MEMBERS.filter(m => m[2]).length;
+    const buddies = ['henrik', 'sara'].map(k => row({ attrs: `data-go="buddy:${k}"`, lead: photo(k, 40), title: BUD[k].name + (b && k === 'henrik' ? ' ' + badge('You') : ''), sub: b ? (k === 'henrik' ? 'Buddy' : 'Co-buddy') : 'Your buddy', chev: true })).join('');
+    const members = MEMBERS.map(([a, n, ok]) => b
+      ? row({ attrs: `data-go="member:${a}"`, lead: ini(a, 36, 13), title: n, sub: `<span class="dot" style="background:${ok ? 'var(--green)' : '#f08a24'};margin-right:6px"></span>${ok ? 'Checked in' : 'Not checked in'}`, chev: true })
+      : row({ tag: 'div', lead: ini(a, 36, 13), title: n + (a === 'IS' ? ' ' + badge('You') : ''), sub: 'New student',
+          right: a === 'IS' ? '' : `<a class="msg-btn" ${ext(CONFIG.messenger[a] || 'https://m.me/')} aria-label="Message ${n} on Messenger">${I('message-circle', 18)}</a>` })).join('');
+    return page(`<div class="scroll">${large('Group 7', b ? 'You’re a buddy' : '10 students · 2 buddies', b ? `<div style="display:flex;gap:10px"><button data-modal="compose" class="circle-btn" aria-label="New announcement">${I('plus', 20)}</button>${profileBtn()}</div>` : profileBtn())}
+      ${sec('Announcements', anns.map(annRow).join('') + row({ attrs: 'data-go="board"', title: '<span class="tint">See All</span>', chev: true }))}
+      ${sec('', row({ tag: 'a', attrs: ext(CONFIG.messenger.group), lead: ibox('message-circle'), title: 'Open Group Chat', sub: 'Questions and conversations happen in Messenger', right: I('arrow-up-right', 18, 'l3') }))}
+      ${sec('Buddies', buddies)}
+      ${sec(b ? `Members · ${checked} of ${MEMBERS.length} checked in at Samfundet` : 'Members', members, b ? 'Locations are only shown for students who opted in.' : 'Tap the message icon to chat with someone on Messenger. Phone numbers and locations are only visible to your buddies.')}
+    </div>`);
+  },
+
+  board: () => page(`${navbar('Announcements', isBuddy() ? `<button data-modal="compose" aria-label="New announcement">${I('plus', 24)}</button>` : '')}<div class="scroll" style="padding-top:8px">
+      ${sec('Pinned', annList().filter(a => a.pinned).map(annRow).join(''))}
+      ${annList().some(a => !a.pinned) ? sec('Earlier', annList().filter(a => !a.pinned).map(annRow).join('')) : ''}
+      <p class="f" style="text-align:center;padding:0 24px">Announcements are one-way. Questions go in the Group 7 Messenger chat.</p>
+    </div>`),
+
+  annd: id => {
+    const a = annList().find(x => x.id === id);
+    return page(`${navbar()}<div class="scroll"><div style="display:flex;gap:12px;align-items:center;padding:4px 16px 16px">${ini(a.av, 48, 16)}<div><p class="hl">${a.name}</p><p class="f">Today ${a.time}${a.pinned ? ' · Pinned' : ''}</p></div></div>
+      <p class="pad" style="font-size:20px;line-height:27px;margin-bottom:24px">${a.text}</p>
+      ${(() => { const k = id === 'ha' ? 'pre' : a.ev; return k && EV[k] ? sec('Related event', row({ attrs: `data-go="event:${k}"`, lead: ibox('calendar-days'), title: EV[k].title, sub: `${dayWord(EV[k].d)} ${EV[k].t} · ${EV[k].place}`, chev: true })) : ''; })()}
+      ${sec('', row({ tag: 'a', attrs: ext(CONFIG.messenger.group), lead: ibox('message-circle'), title: 'Ask in the Group Chat', right: I('arrow-up-right', 18, 'l3') }))}
+    </div>`);
+  },
+
+  buddy: k => {
+    const bd = BUD[k], self = isBuddy() && k === 'henrik';
+    return page(`${navbar()}<div class="scroll"><div class="center">${photo(k, 104)}<h1 class="t1" style="margin-top:8px">${bd.name}</h1><p class="s">${self ? 'You · Buddy for Group 7' : (isBuddy() ? 'Co-buddy · Group 7' : 'Your buddy · Group 7')}</p></div>
+      ${self ? '' : `<div class="actions"><a class="act" ${ext(CONFIG.messenger[k])}>${I('message-circle', 22)}Message</a><a class="act" ${ext(CONFIG.messenger.group)}>${I('users', 22)}Group Chat</a></div>`}
+      ${sec('About', `<p class="para">Here to help you settle in during Buddy Week. Questions big or small are welcome.</p>`, 'Conversations happen in Messenger. This app is for plans and announcements.')}
+    </div>`);
+  },
+
+  member: a => {
+    const m = MEMBERS.find(x => x[0] === a), loc = LOC[a], tel = a === 'EB' ? CONFIG.phones.emil : '';
+    return page(`${navbar()}<div class="scroll"><div class="center">${ini(a, 88, 30)}<h1 class="t1" style="margin-top:8px">${m[1]}</h1><p class="s">New student · Group 7</p>${m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')}</div>
+      <div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a><a class="act" ${ext(a === 'EB' ? CONFIG.messenger.emil : CONFIG.messenger.group)}>${I('message-circle', 22)}Message</a><button class="act ${loc ? '' : 'off'}" data-act="locate:${a}">${I('map-pin', 22)}Map</button></div>
+      ${sec('', (a === 'EB' ? row({ tag: 'a', attrs: `href="tel:${tel}"`, title: 'Phone', right: '<span class="val tint">+47 932 14 607</span>' }) : '')
+        + row({ tag: 'div', title: 'Expected', right: '<span class="val">Samfundet · 22:00</span>' })
+        + row({ tag: 'div', title: 'Location', right: `<span class="val">${loc ? 'Shared' : 'Not shared'}</span>` }),
+        loc ? `${loc[2]}. ${m[1].split(' ')[0]} opted in to share with buddies.` : `${m[1].split(' ')[0]} hasn’t opted in to location sharing. ${m[2] ? '' : 'Try calling before assuming help is needed.'}`)}
+    </div>`);
+  },
+};
+
+// ---------- sheets (modals) ----------
+const MODALS = {
+  profile: () => {
+    const p = me();
+    const hasPic = S.pic[S.role] !== null;
+    return `<div class="mnav"><span></span><span class="hl">Account</span><button class="r" data-close>Done</button></div><div class="mscroll">
+      <div class="center">${myPic(88)}
+        <div style="display:flex;gap:18px;margin:2px 0 6px"><label class="tint" style="font-size:15px;cursor:pointer">${hasPic ? 'Change Photo' : 'Add Photo'}<input type="file" id="picfile" accept="image/*" hidden></label>${hasPic ? '<button class="tint" style="font-size:15px" data-act="picremove">Remove</button>' : ''}</div>
+        <p class="t2">${p.name}</p><p class="s">${p.sub}</p></div>
+      ${sec('', row({ tag: 'div', title: 'Phone', right: `<span class="val">+47 ${p.phone}</span>` }) + row({ attrs: 'data-close data-tab="group"', title: 'Group', right: '<span class="val">Group 7</span>', chev: true })
+        + row({ attrs: 'data-act="openshare"', title: 'Location Sharing', right: `<span class="val">${S.share ? 'On' : 'Off'}</span>`, chev: true }), isBuddy() ? 'Visible to your Group 7 students.' : 'Your number is only visible to your buddies.')}
+      ${sec('Testing only · View as', `<div style="padding:8px">${`<div class="seg" style="margin:0">${[['student', 'Student'], ['buddy', 'Buddy']].map(([k, l]) => `<button data-act="role:${k}" class="${S.role === k ? 'on' : ''}">${l}</button>`).join('')}</div>`}</div>`)}
+      ${sec('', row({ attrs: 'data-act="logout"', title: '<span class="red">Log Out of Feide</span>' }) + row({ attrs: 'data-act="askdelete"', title: '<span class="red">Delete Account</span>' }),
+        'Deleting your account removes your profile, phone number and photo from Buddy Week permanently.')}
+    </div>`;
+  },
+  share: () => {
+    const b = isBuddy();
+    return `<div class="mnav"><span></span><span class="hl">Location Sharing</span><button class="r" data-close>Done</button></div><div class="mscroll">
+      ${sec('', row({ tag: 'div', lead: ibox('navigation'), title: 'Share My Location', right: sw(S.share, 'share') }),
+        b ? 'Students in Group 7 who opted in can see where you are on the map.' : 'When on, your buddies can see where you are. You can turn it off at any time.')}
+      ${sec(S.share ? 'Who can see you' : 'Who could see you', b ? row({ tag: 'div', lead: ibox('users'), title: 'Group 7 students' }) : ['henrik', 'sara'].map(k => row({ tag: 'div', lead: photo(k, 32), title: BUD[k].name, sub: 'Buddy' })).join(''))}
+      ${sec('', row({ tag: 'div', lead: ibox('users', 'g'), title: 'Meeting points', sub: 'Always visible on the map. No sharing needed.' }))}
+    </div>`;
+  },
+  filters: () => `<div class="mnav"><button class="l" data-act="reset">Reset</button><span class="hl">Filters</span><button class="r" data-close>Done</button></div><div class="mscroll">
+      ${sec('Show only', ['Social', 'Calm', 'Alcohol-free', 'Across groups'].map(c => row({ attrs: `data-act="chip:${c}"`, title: c, right: S.chips.includes(c) ? I('check', 20, 'tint') : '' })).join(''), 'Events must match every selected filter.')}
+    </div>`,
+  compose: () => `<div class="mnav"><button class="l" data-close>Cancel</button><span class="hl">New Announcement</span><button class="r" data-act="publish" id="post" ${S.draft.trim() ? '' : 'disabled'}>Post</button></div><div class="mscroll">
+      ${sec('To', row({ tag: 'div', lead: ini('G7', 36, 13), title: 'Everyone in Group 7', sub: '10 students' }))}
+      ${sec('Message', `<div style="padding:12px 16px"><textarea id="draft" rows="6" placeholder="Write an announcement…" class="t" style="resize:none;line-height:23px">${S.draft}</textarea></div>`, `<span id="count">${S.draft.length}</span> characters`)}
+      ${sec('', row({ tag: 'div', lead: ibox('pin', 'o'), title: 'Pin to Top', right: sw(S.pin, 'pin') })
+        + row({ tag: 'div', lead: ibox('bell', 'gr'), title: 'Notify Group 7 members', sub: `${MEMBERS.length} students get a push notification`, right: sw(S.notify, 'notify') }),
+        'Posts appear on the Group 7 board. The Messenger chat is not affected.')}
+    </div>`,
+  // Quick view of a person (buddies, from Who's Going)
+  person: () => {
+    const { ini: a, group, name } = S.person, own = group === 7, m = own && MEMBERS.find(x => x[0] === a), loc = own && LOC[a];
+    const tel = a === 'EB' ? CONFIG.phones.emil : '';
+    return `<div class="mnav"><span></span><span class="hl">${esc(name.split(' ')[0])}</span><button class="r" data-close>Done</button></div><div class="mscroll">
+      <div class="center">${ini(a, 72, 26)}<p class="t2" style="margin-top:6px">${esc(name)}</p><p class="s">New student · Group ${group}</p>${own ? (m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')) : ''}</div>
+      ${own ? `<div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a><a class="act" ${ext(a === 'EB' ? CONFIG.messenger.emil : CONFIG.messenger.group)}>${I('message-circle', 22)}Message</a><button class="act ${loc ? '' : 'off'}" data-act="plocate:${a}">${I('map-pin', 22)}Map</button></div>
+        ${sec('', row({ tag: 'div', lead: ibox('map-pin', loc ? '' : 'gr'), title: loc ? 'Sharing location' : 'Location not shared', sub: loc ? loc[2] : 'Hasn’t opted in to location sharing' })
+          + row({ attrs: `data-act="pprofile:${a}"`, lead: ibox('user-round', 'gr'), title: 'Open Full Profile', chev: true }))}`
+      : sec('', row({ tag: 'div', lead: ibox('shield-check', 'gr'), title: 'Not in your group', sub: `Contact details and location are only visible to Group ${group}’s buddies.` }))
+        + sec('', row({ tag: 'a', attrs: ext(CONFIG.messenger.group), lead: ibox('message-circle'), title: 'Ask in the Group 7 chat', right: I('arrow-up-right', 18, 'l3') }))}
+    </div>`;
+  },
+  // Create / edit an event (buddies)
+  evedit: () => {
+    const f = S.form, isNew = !f.key, n = isNew ? MEMBERS.length : goingCount(f.key);
+    // Floating-label field: the label sits in the field, then moves above the text once you type
+    const field = (key, label, req = false, area = false) => `<div class="fl">${area
+      ? `<textarea id="f_${key}" data-f="${key}" rows="3" placeholder=" ">${esc(f[key])}</textarea>`
+      : `<input id="f_${key}" data-f="${key}" placeholder=" " value="${esc(f[key])}"${req ? ' aria-required="true"' : ''}>`}<label for="f_${key}">${label}${req ? '<span class="req" aria-hidden="true">*</span>' : ''}</label></div>`;
+    return `<div class="mnav"><button class="l" data-close>Cancel</button><span class="hl">${isNew ? 'New Event' : 'Edit Event'}</span><button class="r" id="save" data-act="fsave" ${formOk() ? '' : 'disabled'}>${isNew ? 'Add' : 'Save'}</button></div><div class="mscroll">
+      ${sec('', field('title', 'Title', true) + field('venue', 'Location', true) + field('addr', 'Address or meeting spot'), '<span style="color:var(--red)">*</span> Required')}
+      ${sec('When', `<div class="frow"><label for="fd">Day</label><select id="fd" data-f="d">${DAYS.map(([, num, name], i) => `<option value="${i}" ${+f.d === i ? 'selected' : ''}>${name} ${num}</option>`).join('')}</select></div>
+        <div class="frow"><label for="ft">Time</label><input id="ft" type="time" data-f="t" value="${esc(f.t)}"></div>`)}
+      ${sec('Details', field('about', 'About this event', false, true) + field('bring', 'What to bring'))}
+      ${sec('Audience & tags', row({ tag: 'div', title: 'Group 7 event', sub: 'Shown under the Group 7 filter', right: sw(f.mine, 'fset:mine') })
+        + TAGS.map(t => row({ attrs: `data-act="ftag:${t}"`, title: t, right: f.tags.includes(t) ? I('check', 20, 'tint') : '' })).join(''))}
+      ${sec(isNew ? 'Announce' : 'Announce this change', row({ tag: 'div', lead: ibox('megaphone'), title: isNew ? 'Post an announcement' : 'Post an announcement', right: sw(f.announce, 'fset:announce') })
+        + (f.announce ? field('msg', 'Message', false, true)
+          + row({ tag: 'div', lead: ibox('bell', 'gr'), title: isNew ? 'Notify Group 7 members' : 'Notify everyone who joined', sub: isNew ? `${MEMBERS.length} students` : (n ? `${n} ${n === 1 ? 'person' : 'people'} signed up` : 'No one has joined yet'), right: sw(f.notify, 'fset:notify') }) : ''),
+        f.announce ? (isNew ? 'Leave the message empty and we’ll describe the new event for you.' : 'Leave the message empty and we’ll describe what changed for you.') : (isNew ? 'Off: the event is added quietly.' : 'Off: changes are saved quietly. Changes to time, day or location are still highlighted on the event.'))}
+      ${isNew ? '' : sec('', row({ attrs: 'data-act="fdel"', title: `<span class="red">${f.del ? 'Tap again to delete this event' : 'Delete Event'}</span>` }))}
+    </div>`;
+  },
+};
+
+// ---------- rendering ----------
+const app = document.getElementById('app');
+let lmap = null, toastTimer = null;
+function render() {
+  if (lmap) { S.view = S.recenter ? null : [lmap.getCenter(), lmap.getZoom()]; S.recenter = false; lmap.remove(); lmap = null; }
+  app.innerHTML = SCREENS[S.screen](S.param)
+    + (S.modal ? `<div class="modal-bg" data-close><div class="modal" data-stop><div class="mgrab" aria-hidden="true"></div>${MODALS[S.modal]()}</div></div>` : '')
+    + (S.alert === 'delete' ? `<div class="alert-bg" role="alertdialog" aria-modal="true" aria-labelledby="altitle"><div class="alert"><div class="at"><b id="altitle">Delete Account?</b><p>Your Buddy Week account, profile, phone number and photo will be permanently deleted. You’ll be removed from Group 7.<br><br><b style="font-size:13px;display:inline">This can’t be undone.</b></p></div>
+        <div class="ab"><button data-act="alertcancel">Cancel</button><button data-act="delacc" style="color:var(--red);font-weight:600">Delete</button></div></div></div>` : '')
+    + (S.toast ? `<div class="toast">${I('circle-check', 18)}${S.toast}</div>` : '');
+  initMap();
+  window.lucide && lucide.createIcons();
+}
+function toast(t) { S.toast = t; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 1800); }
+
+const NORWAY = [[57.7, 4.0], [71.4, 31.6]];
+function initMap() {
+  const el = document.getElementById('lmap'); if (!el || !window.L) return;
+  const b = isBuddy();
+  lmap = L.map(el, { zoomControl: false, maxBounds: NORWAY, maxBoundsViscosity: 1, minZoom: 5, maxZoom: 19 });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, bounds: NORWAY, noWrap: true, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>' }).addTo(lmap);
+  const today = Object.keys(EV).filter(k => EV[k].d === 0);
+  const selEv = S.msel && S.msel.startsWith('ev:') ? S.msel.slice(3) : null;
+  const evs = selEv && !today.includes(selEv) ? [...today, selEv] : today;
+  const pad = { paddingTopLeft: [40, 70], paddingBottomRight: [40, S.sheet === 'min' ? 140 : 360] };
+  const v = S.focus || S.view; S.focus = null;
+  if (v) lmap.setView(v[0], v[1]); else if (today.length) lmap.fitBounds(today.map(coord), pad); else lmap.setView(MEET.ll, 14);
+  const pin = (ll, html, z, on) => L.marker(ll, { icon: L.divIcon({ html, className: '', iconSize: [0, 0] }), zIndexOffset: on ? 2000 : z });
+  evs.forEach(k => {
+    const on = selEv === k || (k === 'tour' && S.msel === 'meet');
+    pin(coord(k), `<div class="mk ${on ? 'on' : ''}"><span class="mk-i">${I('calendar-days', 15)}</span><span class="mk-l">${k === 'tour' && S.msel === 'meet' ? 'Group 7 · 12:00' : EV[k].t + ' ' + EV[k].place}</span></div>`, 100, on)
+      .addTo(lmap).on('click', () => selectOnMap('ev:' + k));
+  });
+  if (b) Object.entries(LOC).forEach(([a, [lat, lng]]) => {
+    const on = S.msel === 'stu:' + a;
+    pin([lat, lng], `<div class="mk ${on ? 'on' : ''}"><span class="mk-s">${a}</span></div>`, 500, on).addTo(lmap).on('click', () => selectOnMap('stu:' + a));
+  });
+  if (S.share) pin(ME[S.role], `<div class="me"></div>`, 1500, false).addTo(lmap).on('click', () => selectOnMap('me'));
+  lmap.on('click', () => { if (S.msel) { S.msel = null; render(); } });
+  setTimeout(() => lmap && lmap.invalidateSize(), 50);
+}
+function coordsOf(sel) {
+  if (sel.startsWith('ev:')) return coord(sel.slice(3));
+  if (sel.startsWith('stu:')) return LOC[sel.slice(4)].slice(0, 2);
+  if (sel === 'meet') return MEET.ll;
+  if (sel === 'me') return ME[S.role];
+}
+function selectOnMap(sel, zoom) {
+  S.msel = sel; S.sheet = 'mid';
+  const c = coordsOf(sel), z = zoom || Math.max(lmap ? lmap.getZoom() : 15, sel.startsWith('stu:') ? 18 : 15);
+  // Centre slightly south of the pin so it sits above the bottom sheet (~130 px)
+  const degPerPx = 360 / (256 * Math.pow(2, z)) * Math.cos(c[0] * Math.PI / 180);
+  S.focus = [[c[0] - 130 * degPerPx, c[1]], z];
+  render();
+}
+
+// ---------- navigation ----------
+function go(target, push = true) {
+  const i = target.indexOf(':'); const s = i < 0 ? target : target.slice(0, i), p = i < 0 ? null : target.slice(i + 1);
+  if (push) { S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); }
+  S.screen = s; S.param = p; render();
+  const sc = app.querySelector('.scroll'); if (sc) sc.scrollTop = 0;
+}
+function tab(t) {
+  if (S.screen !== t || S.stack.length) history.pushState({ app: 1 }, '');
+  S.tab = t; S.stack = []; S.modal = null; if (t === 'map') { S.msel = null; } go(t, false);
+}
+function openModal(m) { S.modal = m; history.pushState({ app: 1, modal: 1 }, ''); render(); }
+function closeModal() { if (history.state && history.state.modal) history.back(); else { S.modal = null; render(); } }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-go],[data-back],[data-tab],[data-act],[data-modal],[data-close]');
+  if (!el) return;
+  // A plain link inside a tappable card should only open the link
+  const link = e.target.closest('a[href]'); if (link && el.contains(link) && link !== el) return;
+  // Taps inside a sheet don't close it (only the dimmed backdrop does)
+  if (el.classList.contains('modal-bg') && e.target.closest('.modal')) return;
+  const d = el.dataset;
+  if (d.tab) { if (S.modal) { S.modal = null; history.replaceState({ app: 1 }, ''); } return tab(d.tab); }
+  if ('close' in d) return closeModal();
+  if (d.modal) return openModal(d.modal);
+  if ('back' in d) { if (history.state && history.state.app) history.back(); else { S.screen = S.tab; render(); } return; }
+  if (d.go) return go(d.go);
+  const [a, ...rest] = d.act.split(':'); const v = rest.join(':');
+  if (a === 'feidego') return go('welcome');
+  if (a === 'start') { if (!phoneOk()) return; S.stack = []; history.pushState({ app: 1 }, ''); S.tab = 'today'; return go('today', false); }
+  if (a === 'lang') S.lang++;
+  else if (a === 'org') S.org++;
+  else if (a === 'help') S.help = !S.help;
+  else if (a === 'day') S.day = +v;
+  else if (a === 'scope') S.scope = v;
+  else if (a === 'chip') S.chips = S.chips.includes(v) ? S.chips.filter(c => c !== v) : [...S.chips, v];
+  else if (a === 'reset') S.chips = [];
+  else if (a === 'join') { S.joined[v] = !S.joined[v]; if (S.joined[v]) toast('You’re going'); }
+  else if (a === 'ascope') S.ascope = v;
+  else if (a === 'share') { S.share = !S.share; toast(S.share ? 'Location sharing on' : 'Location sharing off'); }
+  else if (a === 'openshare') { S.modal = null; history.replaceState({ app: 1 }, ''); tab('map'); return openModal('share'); }
+  else if (a === 'pin') S.pin = !S.pin;
+  else if (a === 'role') { S.role = v; S.msel = null; S.mlist = 'events'; }
+  else if (a === 'logout') { Object.assign(S, { role: 'student', stack: [], joined: {}, share: false, modal: null, tab: 'today', screen: 'login', param: null }); history.replaceState({ app: 1 }, ''); }
+  else if (a === 'publish') {
+    const text = S.draft.trim(); if (!text) return;
+    post(text, null, S.pin);
+    toast(S.notify ? `Posted · ${MEMBERS.length} notified` : 'Posted to Group 7');
+    S.draft = ''; S.notify = false; S.modal = null; history.replaceState({ app: 1 }, ''); return go('board', S.screen !== 'board');
+  }
+  else if (a === 'notify') S.notify = !S.notify;
+  else if (a === 'person') { const [ini, group, name] = v.split('|'); S.person = { ini, group: +group, name: decodeURIComponent(name) }; return openModal('person'); }
+  else if (a === 'plocate' || a === 'pprofile') {
+    S.modal = null; history.replaceState({ app: 1 }, '');
+    if (a === 'pprofile') return go('member:' + v);
+    S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; S.mlist = 'group'; return selectOnMap('stu:' + v, 18);
+  }
+  else if (a === 'askdelete') S.alert = 'delete';
+  else if (a === 'alertcancel') S.alert = null;
+  else if (a === 'delacc') {
+    Object.assign(S, { alert: null, modal: null, role: 'student', stack: [], joined: {}, share: false, pic: {}, phone: '', posts: [], tab: 'today', screen: 'login', param: null });
+    history.replaceState({ app: 1 }, ''); toast('Account deleted');
+  }
+  else if (a === 'picremove') S.pic[S.role] = null;
+  else if (a === 'newev') return openEditor(null);
+  else if (a === 'editev') return openEditor(v);
+  else if (a === 'ftag') { const t = S.form.tags; S.form.tags = t.includes(v) ? t.filter(x => x !== v) : [...t, v]; }
+  else if (a === 'fset') S.form[v] = !S.form[v];
+  else if (a === 'fsave') { if (formOk()) return saveEvent(); return; }
+  else if (a === 'fdel') { if (S.form.del) return deleteEvent(); S.form.del = true; }
+  else if (a === 'showmap') { S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; return selectOnMap('ev:' + v, 16); }
+  else if (a === 'locate') { S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; S.mlist = 'group'; return selectOnMap('stu:' + v, 18); }
+  else if (a === 'msel') return selectOnMap(v);
+  else if (a === 'meet') return selectOnMap('meet', 16);
+  else if (a === 'mclose') S.msel = null;
+  else if (a === 'mlist') S.mlist = v;
+  else if (a === 'sheet') S.sheet = S.sheet === 'min' ? 'mid' : 'min';
+  else if (a === 'recenter') { S.recenter = true; S.msel = null; }
+  render();
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'draft') { S.draft = e.target.value; document.getElementById('count').textContent = S.draft.length; document.getElementById('post').disabled = !S.draft.trim(); }
+  if (e.target.id === 'phone') {
+    S.phone = e.target.value; const ok = phoneOk();
+    document.getElementById('phoneok').style.visibility = ok ? '' : 'hidden';
+    document.getElementById('startbtn').disabled = !ok;
+    document.getElementById('phonehint').style.visibility = ok ? 'hidden' : '';
+  }
+  if (e.target.dataset.f && S.form) { S.form[e.target.dataset.f] = e.target.value; const s = document.getElementById('save'); if (s) s.disabled = !formOk(); }
+});
+// ---------- draggable sheets ----------
+// Map panel snaps between three heights; pop-up sheets can be dragged down to close.
+const SHEET_H = { min: '118px', mid: '45%', max: '90%' };
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  const handle = e.target.closest('.grab, .mhead, .mgrab, .modal .mnav');
+  if (!handle || e.target.closest('a, input, select, textarea, label, button:not(.grab)')) return;
+  const ms = handle.closest('.msheet'), md = handle.closest('.modal');
+  const el = ms || md; if (!el) return;
+  drag = { kind: ms ? 'map' : 'modal', el, y0: e.clientY, t0: Date.now(), h0: el.offsetHeight, max: el.parentElement.offsetHeight, moved: false };
+  el.style.transition = 'none';
+  try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dy = e.clientY - drag.y0; if (Math.abs(dy) > 5) drag.moved = true;
+  if (drag.kind === 'map') drag.el.style.height = Math.max(70, Math.min(drag.max * .92, drag.h0 - dy)) + 'px';
+  else drag.el.style.transform = `translateY(${Math.max(0, dy)}px)`;
+});
+function endDrag(e) {
+  if (!drag) return;
+  const d = drag, dy = e.clientY - d.y0, fast = Date.now() - d.t0 < 250; drag = null;
+  d.el.style.transition = '';
+  if (d.kind === 'map') {
+    const px = { min: 118, mid: d.max * .45, max: d.max * .9 }, h = d.el.offsetHeight;
+    let to;
+    if (!d.moved) to = S.sheet === 'min' ? 'mid' : 'min';                       // tap on the handle
+    else if (fast && Math.abs(dy) > 30) to = dy < 0 ? (S.sheet === 'min' ? 'mid' : 'max') : (S.sheet === 'max' ? 'mid' : 'min'); // flick
+    else to = Object.keys(px).reduce((a, b) => Math.abs(px[b] - h) < Math.abs(px[a] - h) ? b : a);
+    S.sheet = to; d.el.style.height = SHEET_H[to];
+  } else if (d.moved && (dy > 120 || (fast && dy > 40))) {
+    d.el.style.transform = 'translateY(100%)'; setTimeout(closeModal, 200);
+  } else d.el.style.transform = '';
+}
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
+
+// New profile photo: shrink to 256 px so it stays light, then show it everywhere
+document.addEventListener('change', e => {
+  if (e.target.id !== 'picfile' || !e.target.files[0]) return;
+  const img = new Image(), url = URL.createObjectURL(e.target.files[0]);
+  img.onload = () => {
+    const c = document.createElement('canvas'), s = 256, m = Math.min(img.width, img.height);
+    c.width = c.height = s;
+    c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, s, s);
+    S.pic[S.role] = c.toDataURL('image/jpeg', .85); URL.revokeObjectURL(url); toast('Photo updated'); render();
+  };
+  img.src = url;
+});
+document.addEventListener('change', e => { if (e.target.dataset.f && S.form) { S.form[e.target.dataset.f] = e.target.value; const s = document.getElementById('save'); if (s) s.disabled = !formOk(); } });
+// Android / browser back: close sheet first, then step back inside the app
+window.addEventListener('popstate', () => {
+  if (S.modal) { S.modal = null; return render(); }
+  const prev = S.stack.pop();
+  if (prev) { S.screen = prev[0]; S.param = prev[1]; if (['today', 'events', 'map', 'group'].includes(prev[0])) S.tab = prev[0]; }
+  else if (!['login', 'today'].includes(S.screen)) { S.screen = 'today'; S.tab = 'today'; S.param = null; }
+  render();
+});
+render();
+</script>
+</body>
+</html>

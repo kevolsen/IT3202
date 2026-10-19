@@ -15,13 +15,20 @@ while ($true) {
     $path = 'index.html'
     if ($line -match '^\S+\s+(\S+)') { $p = [Uri]::UnescapeDataString(($matches[1] -split '\?')[0].TrimStart('/')); if ($p) { $path = $p } }
     $file = [IO.Path]::GetFullPath((Join-Path $root $path))
-    if ($file.StartsWith($root) -and (Test-Path $file -PathType Leaf)) {
+    $extra = ''
+    if (Test-Path $file -PathType Container) {
+      if (-not $path.EndsWith('/') -and $path -ne 'index.html') { $extra = "Location: /$path/`r`n" }
+      $file = Join-Path $file 'index.html'
+    }
+    if ($extra) {
+      $body = [Text.Encoding]::UTF8.GetBytes('Moved'); $status = '301 Moved Permanently'; $type = 'text/plain'
+    } elseif ($file.StartsWith($root) -and (Test-Path $file -PathType Leaf)) {
       $body = [IO.File]::ReadAllBytes($file); $status = '200 OK'; $type = $types[[IO.Path]::GetExtension($file)]
       if (!$type) { $type = 'application/octet-stream' }
     } else {
       $body = [Text.Encoding]::UTF8.GetBytes('Not found'); $status = '404 Not Found'; $type = 'text/plain'
     }
-    $head = [Text.Encoding]::ASCII.GetBytes("HTTP/1.1 $status`r`nContent-Type: $type`r`nContent-Length: $($body.Length)`r`nCache-Control: no-cache`r`nConnection: close`r`n`r`n")
+    $head = [Text.Encoding]::ASCII.GetBytes("HTTP/1.1 $status`r`n$extra`Content-Type: $type`r`nContent-Length: $($body.Length)`r`nCache-Control: no-cache`r`nConnection: close`r`n`r`n")
     $stream.Write($head, 0, $head.Length); $stream.Write($body, 0, $body.Length); $stream.Flush()
   } catch { } finally { $client.Close() }
 }
