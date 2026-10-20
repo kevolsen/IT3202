@@ -262,6 +262,65 @@
   .frow label { font-size: 17px; flex: 1; }
   .frow input, .frow select { width: auto; text-align: right; color: var(--tint); font-size: 17px; background: transparent; border: 0; -webkit-appearance: none; appearance: none; }
 
+  /* Welcome / setup checklist */
+  .intro { display: flex; align-items: center; gap: 12px; margin: 0 16px 22px; padding: 12px 14px; background: #fff; border-radius: 14px; }
+  .intro .stack > * { border: 2px solid #fff; }
+  .step { margin: 0 16px 12px; padding: 16px; background: #fff; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .step-h { display: flex; align-items: center; gap: 10px; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--tint); color: #fff; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .num.done { background: var(--green); }
+  .phone-in { display: flex; align-items: center; height: 52px; border: 1.5px solid var(--sep); border-radius: 12px; overflow: hidden; }
+  .phone-in:focus-within { border-color: var(--tint); }
+  .phone-in select { height: 100%; padding: 0 26px 0 12px; border: 0; border-right: .5px solid var(--sep); background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2300509e' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center; font-size: 17px; color: var(--l1); -webkit-appearance: none; appearance: none; }
+  .phone-in input { flex: 1; min-width: 0; height: 100%; padding: 0 12px; font-size: 17px; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+  .phone-in #phoneok { padding-right: 12px; display: flex; }
+  .btn.fb { background: #1877f2; color: #fff; }
+  .synced { display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 14px; border-radius: 14px; background: var(--green-bg); color: var(--green); font-size: 16px; font-weight: 600; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Today: quick actions, countdown, this week */
+  .cd { text-transform: none; font-weight: 600; color: var(--l2); margin-left: 4px; }
+  .next .pills { flex-wrap: wrap; }
+  .hscroll { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 24px; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
+  .hscroll::-webkit-scrollbar { display: none; }
+  .mini-ev { flex-shrink: 0; width: 158px; min-height: 132px; background: #fff; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; text-align: left; scroll-snap-align: start; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .mini-ev .eyebrow { font-size: 12px; margin: 0; }
+  .ibox.fb { background: #1877f2; }
+
+  /* Map panel: day picker */
+  .mchips { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 14px; scrollbar-width: none; scroll-behavior: smooth; }
+  .mchips::-webkit-scrollbar { display: none; }
+  .mchip { flex-shrink: 0; height: 34px; padding: 0 14px; border-radius: 17px; background: var(--fill); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .mchip small { font-weight: 500; color: var(--l2); font-size: 13px; }
+  .mchip.on { background: var(--tint); color: #fff; } .mchip.on small { color: rgba(255,255,255,.75); }
+  .daynav { display: flex; gap: 6px; }
+  .daynav button { width: 34px; height: 34px; border-radius: 50%; background: var(--fill); color: var(--tint); display: flex; align-items: center; justify-content: center; }
+  .daynav button:disabled { color: var(--l3); }
+
+  /* Not synced with Facebook */
+  .nofb { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin-top: 2px; padding: 1px 7px 1px 5px; border-radius: 6px; background: var(--fill); color: var(--l2); font-size: 12px; font-weight: 600; line-height: 18px; }
+  .center .nofb { align-self: center; }
+  .msg-btn.off { background: var(--fill); color: var(--l3); }
+  .act.dis { color: var(--l3); }
+  .btn.dis { background: var(--fill); color: var(--l3); }
+
+  /* Onboarding steps */
+  .ob-top { height: 44px; flex-shrink: 0; display: flex; align-items: center; padding: 0 8px; }
+  .ob-back { width: 44px; height: 44px; display: flex; align-items: center; color: var(--tint); }
+  .dots { display: flex; gap: 6px; margin: 0 auto; }
+  .dot2 { width: 8px; height: 8px; border-radius: 4px; background: var(--l3); transition: width .2s, background .2s; }
+  .dot2.past { background: var(--tint); opacity: .45; } .dot2.on { width: 22px; background: var(--tint); }
+  .ob { padding: 8px 28px 16px; display: flex; flex-direction: column; }
+  .ob-c { text-align: center; }
+  .ob-txt { font-size: 17px; line-height: 24px; color: var(--l2); text-align: center; margin-top: 10px; }
+  .ob-ic { width: 92px; height: 92px; border-radius: 26px; background: var(--tint2); color: var(--tint); display: flex; align-items: center; justify-content: center; margin: 28px auto 22px; flex-shrink: 0; }
+  .ob-ic.fbic { background: #1877f2; color: #fff; }
+  .ob-pics { display: flex; justify-content: center; margin: 32px 0 22px; } .ob-pics img { border: 4px solid var(--bg); } .ob-pics img + img { margin-left: -18px; }
+  .ob-points { margin-top: 26px; display: flex; flex-direction: column; gap: 14px; background: #fff; border-radius: 16px; padding: 16px; }
+  .ob-points p { display: flex; gap: 12px; align-items: center; font-size: 16px; }
+  .ob-actions { flex-shrink: 0; padding: 8px 20px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .btn.plain { background: none; color: var(--tint); font-weight: 500; height: 44px; }
+
   /* Login */
   .login { flex: 1; display: flex; flex-direction: column; padding: 24px 24px 8px; gap: 18px; }
   .login img.hero-img { width: 100%; height: 260px; object-fit: cover; border-radius: 20px; }
@@ -280,8 +339,11 @@
 <script>
 // ---------- state ----------
 const S = { role: 'student', screen: 'login', param: null, tab: 'today', stack: [], modal: null, toast: null,
-  day: 0, scope: 'all', chips: [], joined: {}, ascope: 'g7', share: false, pin: true, notify: false, pic: {}, alert: null, phone: '', posts: [], draft: '', form: null,
+  day: 0, scope: 'all', chips: [], joined: {}, ascope: 'g7', share: false, pin: true, notify: false, pic: {}, alert: null, cc: 'no', fb: false, phone: '', posts: [], draft: '', form: null,
   msel: null, sheet: 'mid', mlist: 'events', org: 0, lang: 0, help: false };
+// Each role (student / buddy) has its own list of joined events
+S.joinedBy = { student: {}, buddy: {} };
+Object.defineProperty(S, 'joined', { get: () => S.joinedBy[S.role], set: v => { S.joinedBy[S.role] = v; } });
 const A = '../assets/';
 const ME = { student: [63.4163, 10.4085], buddy: [63.42228, 10.39505] };
 const COORD = { tour: [63.4195, 10.4022], coffee: [63.4290, 10.3870], pre: [63.4118, 10.4317], sam: [63.4223, 10.3953], rebus: [63.4195, 10.4022], cinema: [63.4069, 10.4717],
@@ -294,7 +356,22 @@ const TAGS = ['Social', 'Calm', 'Alcohol-free', 'Across groups'];
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const nowTime = () => { const n = new Date(); return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); };
 const dayWord = d => d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : DAYS[d][2];
-const phoneOk = () => S.phone.replace(/\D/g, '').length === 8;
+// The prototype's clock is fixed at 09:41 on Monday (like the status bar)
+const NOW = '09:41';
+const countdown = t => { const [h, m] = t.split(':').map(Number), d = h * 60 + m - (9 * 60 + 41); return d <= 0 ? 'now' : 'in ' + (d >= 60 ? Math.floor(d / 60) + ' h ' : '') + (d % 60 ? (d % 60) + ' min' : '').trim(); };
+const dayEvents = d => Object.keys(EV).filter(k => EV[k].d === d).sort((x, y) => EV[x].t.localeCompare(EV[y].t));
+// Phone numbers: country code + national number with the length that country uses
+const CC = [
+  { k: 'no', flag: '🇳🇴', name: 'Norway', code: '+47', len: [8, 8], groups: [3, 2, 3] },
+  { k: 'se', flag: '🇸🇪', name: 'Sweden', code: '+46', len: [9, 9], groups: [2, 3, 2, 2] },
+  { k: 'dk', flag: '🇩🇰', name: 'Denmark', code: '+45', len: [8, 8], groups: [2, 2, 2, 2] },
+  { k: 'fi', flag: '🇫🇮', name: 'Finland', code: '+358', len: [9, 10], groups: [2, 3, 5] },
+];
+const ccOf = () => CC.find(x => x.k === S.cc) || CC[0];
+const lenText = c => c.len[0] === c.len[1] ? `${c.len[0]} digits` : `${c.len[0]}–${c.len[1]} digits`;
+const phoneOk = () => { const c = ccOf(), n = S.phone.length; return n >= c.len[0] && n <= c.len[1]; };
+const phoneHint = () => { const c = ccOf(), left = c.len[0] - S.phone.length; return S.phone.length === 0 ? `Enter your phone number (${lenText(c)}) to continue` : left > 0 ? `${left} more digit${left === 1 ? '' : 's'} needed` : ''; };
+const fmtPhone = (d, c = ccOf()) => { let out = [], i = 0; for (const g of c.groups) { if (i >= d.length) break; out.push(d.slice(i, i + g)); i += g; } if (i < d.length) out.push(d.slice(i)); return `${c.code} ${out.join(' ')}`; };
 const formOk = () => { const f = S.form; return !!(f && f.title.trim() && f.venue.trim() && /^\d\d:\d\d$/.test(f.t)); };
 function openEditor(k) {
   const e = k && EV[k];
@@ -353,7 +430,7 @@ const row = ({ lead = '', title, sub = '', right = '', chev = false, attrs = '',
 const sec = (h, rows, f = '') => `<section class="sec">${h ? `<p class="sec-h">${h}</p>` : ''}<div class="list">${rows}</div>${f ? `<p class="sec-f">${f}</p>` : ''}</section>`;
 const ibox = (n, k = '') => `<span class="ibox ${k}">${I(n, 18)}</span>`;
 const isBuddy = () => S.role === 'buddy';
-const me = () => isBuddy() ? { first: 'Henrik', name: 'Henrik Aune', photo: 'henrik', sub: 'Buddy · NTNU Trondheim', phone: '948 26 115' } : { first: 'Ingrid', name: 'Ingrid Solberg', photo: 'ingrid', sub: 'New student · NTNU Trondheim', phone: S.phone };
+const me = () => isBuddy() ? { first: 'Henrik', name: 'Henrik Aune', photo: 'henrik', sub: 'Buddy · NTNU Trondheim', phone: '+47 948 26 115' } : { first: 'Ingrid', name: 'Ingrid Solberg', photo: 'ingrid', sub: 'New student · NTNU Trondheim', phone: S.phone ? fmtPhone(S.phone) : 'Not added' };
 const status = () => `<div class="sb"><span>9:41</span><span class="island"></span><span class="sb-r"><img src="${A}ios-signal.svg" alt=""><img src="${A}ios-wifi.svg" alt=""><img src="${A}ios-battery.svg" alt=""></span></div>`;
 const tabbar = () => `<nav class="tabbar">${[['today', 'house', 'Today'], ['events', 'calendar-days', 'Events'], ['map', 'map', 'Map'], ['group', 'users', 'Group']]
   .map(([k, i, l]) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-tab="${k}">${I(i, 25)}${l}</button>`).join('')}</nav>`;
@@ -369,6 +446,18 @@ const myPic = s => {
 };
 // Account button: shown top-right on every in-app page
 const profileBtn = (s = 36) => `<button data-modal="profile" class="pbtn" aria-label="Account and settings">${myPic(s)}<span class="gear">${I('settings', 11)}</span></button>`;
+// Students who haven't synced with Facebook can't be messaged through the app
+const NOFB = new Set(['AA', 'ON', 'TH']);
+const fbTag = () => `<span class="nofb">${I('facebook', 11)}Not synced with Facebook</span>`;
+const msgLink = a => a === 'EB' ? CONFIG.messenger.emil : (CONFIG.messenger[a] || 'https://m.me/');
+const msgBtn = (a, name, kind) => {
+  const off = NOFB.has(a), label = off ? `${name} hasn’t synced with Facebook, so messaging isn’t available` : `Message ${name} on Messenger`;
+  if (kind === 'icon') return off ? `<button class="msg-btn off" data-act="nofb:${a}" aria-label="${label}">${I('message-circle-off', 18)}</button>` : `<a class="msg-btn" ${ext(msgLink(a))} aria-label="${label}">${I('message-circle', 18)}</a>`;
+  if (kind === 'sm') return off ? `<button class="btn g sm dis" data-act="nofb:${a}" aria-label="${label}">${I('message-circle-off', 16)}Message</button>` : `<a class="btn g sm" ${ext(msgLink(a))}>${I('message-circle', 16)}Message</a>`;
+  return off ? `<button class="act dis" data-act="nofb:${a}" aria-label="${label}">${I('message-circle-off', 22)}Message</button>` : `<a class="act" ${ext(msgLink(a))}>${I('message-circle', 22)}Message</a>`;
+};
+// A buddy's picture; when you are that buddy it's your own (possibly uploaded) picture
+const budPic = (k, s) => isBuddy() && k === 'henrik' ? myPic(s) : photo(BUD[k].photo, s);
 const evRow = k => { const e = EV[k]; return row({ attrs: `data-go="event:${k}"`, lead: `<span class="time">${e.t}</span>`, title: e.title, sub: e.place + (e.upd ? ' · <span style="color:var(--orange)">Time changed</span>' : ''), right: S.joined[k] ? I('circle-check', 20, 'tint') : '', chev: true }); };
 const annList = () => [...S.posts.slice().reverse().map(p => ({ id: 'post:' + p.i, av: 'HA', name: 'Henrik Aune', time: p.time, text: p.text, pinned: p.pin, ev: p.ev })), ...ANN.map(a => ({ ...a, text: (a.full || a.body).replace(/<br>/g, ' '), pinned: 1 }))];
 const annRow = a => row({ attrs: `data-go="annd:${a.id}"`, lead: ini(a.av, 40, 14), title: `<span style="display:flex;justify-content:space-between;gap:8px"><span class="hl">${a.name}</span><span class="f">${a.time}</span></span>`, sub: `<span class="clamp2">${a.text}</span>`, chev: false });
@@ -403,25 +492,60 @@ const SCREENS = {
     </div><div class="hi"></div></div>`;
   },
 
-  welcome: () => page(`<div class="scroll">${large('You’re in Group 7', 'Welcome, Ingrid')}
-      <p class="pad s" style="font-size:17px;line-height:23px;margin:-4px 0 18px">Meet your buddies. They’ll help you settle in and find your way.</p>
-      <div style="display:flex;gap:12px;padding:0 16px 24px">${['henrik', 'sara'].map(b => `<div style="flex:1;background:#fff;border-radius:16px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px">${photo(b, 72)}<span class="hl">${BUD[b].name}</span><span class="f">Your buddy</span></div>`).join('')}</div>
-      ${sec('Your phone number (required)', `<label class="row"><span class="row-b"><span class="t" style="color:var(--l2)">+47</span><input id="phone" inputmode="tel" autocomplete="tel" placeholder="8-digit number" value="${esc(S.phone)}" class="t" aria-label="Phone number"><span id="phoneok" style="${phoneOk() ? '' : 'visibility:hidden'}">${I('check', 20, 'tint')}</span></span></label>`, 'Only your buddies can see your number, so they can reach you if needed.')}
-      ${sec('Location', row({ tag: 'div', lead: ibox('navigation'), title: 'Share my location', sub: 'With your buddies Henrik and Sara', right: sw(S.share, 'share') }), 'Off by default. You can change this any time from the Map. Meeting points work without sharing.')}
-    </div><div class="pad" style="padding-bottom:8px"><button class="btn p" id="startbtn" data-act="start" ${phoneOk() ? '' : 'disabled'}>Continue</button><p class="f" id="phonehint" style="text-align:center;margin-top:6px;${phoneOk() ? 'visibility:hidden' : ''}">Enter your phone number to continue</p></div>`, false),
+  // Onboarding: one decision per screen (welcome → phone → location → Facebook)
+  welcome: step => {
+    const st = +(step || 0), c = ccOf();
+    const top = `<div class="ob-top"><button data-back class="ob-back" aria-label="Back">${I('chevron-left', 28)}</button>
+      <div class="dots" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${st + 1}" aria-label="Step ${st + 1} of 4">${[0, 1, 2, 3].map(i => `<span class="dot2 ${i === st ? 'on' : i < st ? 'past' : ''}"></span>`).join('')}</div><span style="width:44px"></span></div>`;
+    const hero = (icon, cls = '') => `<div class="ob-ic ${cls}">${I(icon, 40)}</div>`;
+    const screens = [
+      () => [`<div class="ob-pics">${photo('henrik', 96)}${photo('sara', 96)}</div>
+          <p class="eyebrow ob-c">Welcome, Ingrid</p><h1 class="t1 ob-c">You’re in Group 7</h1>
+          <p class="ob-txt">Henrik and Sara are your buddies. They’ll help you settle in, find your way and feel at home.</p>`,
+        `<button class="btn p" data-go="welcome:1">Get Started</button>`],
+      () => [`${hero('phone')}<h1 class="t1 ob-c">Your phone number</h1>
+          <p class="ob-txt">Only your buddies can see it, so they can reach you if needed.</p>
+          <div class="phone-in" style="margin-top:24px"><label class="sr" for="cc">Country</label><select id="cc" aria-label="Country code">${CC.map(x => `<option value="${x.k}" ${x.k === c.k ? 'selected' : ''}>${x.flag} ${x.code}</option>`).join('')}</select>
+            <input id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="${c.len[1]}" placeholder="${lenText(c)}" value="${esc(S.phone)}" aria-label="Phone number, ${lenText(c)}">
+            <span id="phoneok" style="${phoneOk() ? '' : 'visibility:hidden'}">${I('circle-check', 20, 'tint')}</span></div>
+          <p class="f ob-c" id="phonehint" style="margin-top:10px;${phoneOk() ? 'visibility:hidden' : ''}">${phoneHint()}</p>`,
+        `<button class="btn p" id="startbtn" data-go="welcome:2" ${phoneOk() ? '' : 'disabled'}>Continue</button>`],
+      () => [`${hero('navigation')}<h1 class="t1 ob-c">Share your location?</h1>
+          <p class="ob-txt">Let Henrik and Sara see where you are during Buddy Week, so they can find you if you get lost.</p>
+          <div class="ob-points">${[['users', 'Only your buddies can see it'], ['toggle-right', 'Turn it off any time'], ['map-pin', 'Meeting points work without sharing']].map(([i, t]) => `<p>${I(i, 20, 'tint')}<span>${t}</span></p>`).join('')}</div>`,
+        `<button class="btn p" data-act="obshare:1">Share My Location</button><button class="btn plain" data-act="obshare:0">Not Now</button>`],
+      () => [`${hero('facebook', 'fbic')}<h1 class="t1 ob-c">Sync to Facebook</h1>
+          <p class="ob-txt">Syncing connects the app with your group members and the Group 7 chat. It’s optional, but the chat won’t work as intended without it.</p>
+          ${S.fb === true ? `<div class="synced" style="margin-top:24px">${I('circle-check', 20)}<span style="flex:1">Synced with Facebook</span><button class="tint" style="font-size:15px" data-act="fbunsync">Undo</button></div>` : ''}`,
+        S.fb === true ? `<button class="btn p" data-act="start">Continue</button>`
+          : `<button class="btn fb" data-act="fbsync" ${S.fb === 'busy' ? 'disabled' : ''}>${S.fb === 'busy' ? 'Connecting…' : I('facebook', 20) + 'Sync to Facebook'}</button><button class="btn plain" data-act="start">Skip for Now</button>`],
+    ];
+    const [content, actions] = screens[Math.min(st, 3)]();
+    return page(`${top}<div class="scroll ob">${content}</div><div class="ob-actions">${actions}</div>`, false);
+  },
 
   today: () => {
     const b = isBuddy();
-    const plan = Object.keys(EV).filter(k => EV[k].d === 0 && (EV[k].mine || S.joined[k]) && EV[k].t >= '09:41').sort((x, y) => EV[x].t.localeCompare(EV[y].t));
-    const [nk, ...rest] = plan, nx = nk && EV[nk];
+    const plan = Object.keys(EV).filter(k => EV[k].d === 0 && (EV[k].mine || S.joined[k]) && EV[k].t >= NOW).sort((x, y) => EV[x].t.localeCompare(EV[y].t));
+    const [nk, ...rest] = plan, nx = nk && EV[nk], nj = nk && !!S.joined[nk];
     const changes = Object.keys(EV).filter(k => EV[k].upd && EV[k].d <= 1).map(k => row({ attrs: `data-go="event:${k}"`, lead: ibox('clock', 'o'), title: EV[k].title, sub: EV[k].upd, chev: true }))
       .concat(S.posts.slice(-1).map(p => row({ attrs: `data-go="annd:post:${p.i}"`, lead: ibox('megaphone'), title: 'New announcement', sub: `<span class="clamp2">${p.text}</span>`, chev: true })));
-    const nextBlock = nx ? `<div class="next" data-go="event:${nk}" role="button"><span class="next-chev">${I('chevron-right', 18, 'l3')}</span><p class="k">Next up · ${nx.t}</p><p class="t2" style="margin-top:2px">${nx.title}</p><p class="s">${nx.venue}${nx.dist ? ' · ' + nx.dist.split(' · ').pop() : ''}</p>
-        <div class="pills"><a class="pill" ${ext(maps(nx.dest))}>${I('navigation', 15)}Directions</a><button class="pill" data-act="showmap:${nk}">${I('map', 15)}Map</button></div></div>` : '';
+    // Finish-setup reminder (students who skipped optional steps)
+    const todo = b || S.setupHidden ? [] : [!S.fb && ['facebook', 'Sync to Facebook', 'So the group chat works', 'fbsync', 'Sync'], !S.share && ['navigation', 'Share your location', 'Optional · only your buddies see it', 'share', 'Turn On']].filter(Boolean);
+    const setup = todo.length ? `<section class="sec"><div class="sec-h" style="display:flex;justify-content:space-between;align-items:center"><span>Finish setting up</span><button class="tint" style="font-size:13px;text-transform:none" data-act="hidesetup">Not now</button></div><div class="list">${todo.map(([i, t, s, act, lbl]) =>
+      row({ tag: 'div', lead: ibox(i, i === 'facebook' ? 'fb' : ''), title: t, sub: s, right: `<button class="pill" data-act="${act}" ${S.fb === 'busy' && act === 'fbsync' ? 'disabled' : ''}>${S.fb === 'busy' && act === 'fbsync' ? 'Connecting…' : lbl}</button>` })).join('')}</div></section>` : '';
+    const nextBlock = nx ? `<div class="next" data-go="event:${nk}" role="button"><span class="next-chev">${I('chevron-right', 18, 'l3')}</span>
+        <p class="k">Next up · ${nx.t} <span class="cd">${countdown(nx.t)}</span></p><p class="t2" style="margin-top:2px">${nx.title}</p><p class="s">${nx.venue}${nx.dist ? ' · ' + nx.dist.split(' · ').pop() : ''}</p>
+        <div class="pills"><button class="pill ${nj ? 'on' : ''}" data-act="join:${nk}">${nj ? I('check', 15) + 'Going' : 'Join'}</button><a class="pill" ${ext(maps(nx.dest))}>${I('navigation', 15)}Directions</a><button class="pill" data-act="showmap:${nk}">${I('map', 15)}Map</button></div></div>` : '';
+    // Coming up later this week (Group 7 events)
+    const soon = Object.keys(EV).filter(k => EV[k].d >= 1 && EV[k].mine).sort((x, y) => EV[x].d - EV[y].d || EV[x].t.localeCompare(EV[y].t)).slice(0, 6);
+    const week = soon.length ? `<p class="sec-h" style="padding:0 32px 7px">Coming up this week</p><div class="hscroll">${soon.map(k => { const e = EV[k]; return `<button class="mini-ev" data-go="event:${k}"><span class="eyebrow" style="color:var(--tint)">${dayWord(e.d)} · ${e.t}</span><span class="hl clamp2">${e.title}</span><span class="f">${e.place}</span><span class="f" style="margin-top:auto">${S.joined[k] ? `<span class="tint" style="font-weight:600">✓ Going</span>` : `${goingCount(k)} going`}</span></button>`; }).join('')}</div>` : '';
     return page(`<div class="scroll">${large(`Hi, ${me().first}`, 'Monday 10 August', profileBtn())}
+      ${setup}
       ${changes.length ? sec('Changes', changes.join('')) : ''}
       ${sec('Today’s plan', (nextBlock || row({ tag: 'div', title: '<span style="color:var(--l2)">Nothing else planned today</span>' })) + rest.map(evRow).join('') + row({ attrs: 'data-tab="events"', title: '<span class="tint">See All Events</span>', chev: true }))}
       ${b ? sec('Tonight', row({ attrs: 'data-tab="group"', lead: ibox('users', 'g'), title: 'Check-in at Samfundet', sub: '8 of 10 arrived · 2 still missing', chev: true })) : ''}
+      ${week}
     </div>`);
   },
 
@@ -458,7 +582,7 @@ const SCREENS = {
         + row({ tag: 'a', attrs: ext(maps(e.dest)), lead: ibox('navigation', 'g'), title: 'Directions', sub: e.dist ? e.dist + ' from Hesthagen' : 'Open in Maps', right: I('arrow-up-right', 18, 'l3') }))}
       ${e.about ? sec('About', `<p class="para">${e.about}</p>`) : ''}
       ${e.bring ? sec('What to bring', `<p class="para">${e.bring}</p>`) : ''}
-      ${sec('Responsible buddy', row({ tag: 'a', attrs: ext(CONFIG.messenger[e.buddy]), lead: photo(b.photo, 36), title: b.name, sub: 'Message on Messenger', right: I('message-circle', 20, 'tint') }))}
+      ${sec('Responsible buddy', row({ tag: 'a', attrs: ext(CONFIG.messenger[e.buddy]), lead: budPic(e.buddy, 36), title: b.name, sub: 'Message on Messenger', right: I('message-circle', 20, 'tint') }))}
     </div>`);
   },
 
@@ -468,12 +592,12 @@ const SCREENS = {
       <div class="seg">${[['g7', `Group 7 (${mine.length})`], ['all', `Everyone (${all.length})`]].map(([v, l]) => `<button data-act="ascope:${v}" class="${S.ascope === v ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${sec('', list.length ? list.map(p => isBuddy() && !p.you
         ? row({ attrs: `data-act="person:${p.ini}|${p.group}|${encodeURIComponent(p.name)}"`, lead: ini(p.ini, 36, 13), title: p.name, sub: 'Group ' + p.group + (p.group === 7 && LOC[p.ini] ? ' · Sharing location' : ''), chev: true })
-        : row({ tag: 'div', lead: ini(p.ini, 36, 13), title: p.name + (p.you ? ' ' + badge('You') : ''), sub: 'Group ' + p.group })).join('') : row({ tag: 'div', title: '<span style="color:var(--l2)">No one from Group 7 yet</span>' }))}
+        : row({ tag: 'div', lead: p.you ? myPic(36) : ini(p.ini, 36, 13), title: p.name + (p.you ? ' ' + badge('You') : ''), sub: (p.buddy ? 'Buddy · ' : '') + 'Group ' + p.group })).join('') : row({ tag: 'div', title: '<span style="color:var(--l2)">No one from Group 7 yet</span>' }))}
     </div>`);
   },
 
   map: () => {
-    const b = isBuddy(), sel = S.msel, today = Object.keys(EV).filter(k => EV[k].d === 0).sort((x, y) => EV[x].t.localeCompare(EV[y].t));
+    const b = isBuddy(), sel = S.msel, md = S.mday || 0, today = dayEvents(md);
     let head = '', bodyHtml = '';
     if (sel && sel.startsWith('ev:')) {
       const k = sel.slice(3), e = EV[k];
@@ -488,16 +612,22 @@ const SCREENS = {
     } else if (sel && sel.startsWith('stu:')) {
       const a = sel.slice(4), m = MEMBERS.find(x => x[0] === a);
       head = `<div style="display:flex;gap:12px;align-items:center">${ini(a, 44)}<div><p class="t2">${m[1]}</p><p class="s">${LOC[a][2]}</p></div></div><button data-act="mclose" class="close" aria-label="Close">${I('x', 16)}</button>`;
-      bodyHtml = `<div class="pad" style="display:flex;gap:8px"><a class="btn p sm" href="tel:">${I('phone', 16)}Call</a><a class="btn g sm" ${ext(CONFIG.messenger.group)}>${I('message-circle', 16)}Message</a><button class="btn g sm" data-go="member:${a}">Profile</button></div>`;
+      bodyHtml = `<div class="pad" style="display:flex;gap:8px"><a class="btn p sm" href="tel:">${I('phone', 16)}Call</a>${msgBtn(a, m[1].split(' ')[0], 'sm')}<button class="btn g sm" data-go="member:${a}">Profile</button></div>`;
     } else {
-      head = `<div><p class="t2">${b && S.mlist === 'group' ? 'Group 7' : 'Today'}</p><p class="f">${b && S.mlist === 'group' ? `${Object.keys(LOC).length} of ${MEMBERS.length} sharing location` : `${today.length} events · Monday 10 August`}</p></div>`;
-      const evRows = (b ? '' : row({ attrs: 'data-act="meet"', lead: ibox('users', 'g'), title: 'Where is my group?', sub: 'Meeting point · Gløshaugen 12:00', chev: true }))
-        + today.map(k => row({ attrs: `data-act="msel:ev:${k}"`, lead: `<span class="time">${EV[k].t}</span>`, title: EV[k].title, sub: EV[k].place, chev: true })).join('');
+      const grp = b && S.mlist === 'group';
+      head = grp ? `<div><p class="t2">Group 7</p><p class="f">${Object.keys(LOC).length} of ${MEMBERS.length} sharing location</p></div>`
+        : `<div><p class="t2">${dayWord(md)}</p><p class="f">${today.length} event${today.length === 1 ? '' : 's'} · ${DAYS[md][2]} ${DAYS[md][1]} August</p></div>
+           <div class="daynav"><button data-act="mday:${md - 1}" ${md === 0 ? 'disabled' : ''} aria-label="Previous day">${I('chevron-left', 20)}</button><button data-act="mday:${md + 1}" ${md === 6 ? 'disabled' : ''} aria-label="Next day">${I('chevron-right', 20)}</button></div>`;
+      const evRows = (b || md !== 0 ? '' : row({ attrs: 'data-act="meet"', lead: ibox('users', 'g'), title: 'Where is my group?', sub: 'Meeting point · Gløshaugen 12:00', chev: true }))
+        + (today.length ? today.map(k => row({ attrs: `data-act="msel:ev:${k}"`, lead: `<span class="time">${EV[k].t}</span>`, title: EV[k].title,
+            sub: EV[k].place + (EV[k].mine ? ' · Group 7' : '') + (EV[k].upd ? ' · <span style="color:var(--orange)">Changed</span>' : ''), right: S.joined[k] ? I('circle-check', 20, 'tint') : '', chev: true })).join('')
+          : row({ tag: 'div', title: '<span style="color:var(--l2)">No events this day</span>' }));
+      const chips = grp ? '' : `<div class="mchips" role="tablist" aria-label="Day">${DAYS.map(([d, num], i) => `<button role="tab" aria-selected="${i === md}" data-act="mday:${i}" class="mchip ${i === md ? 'on' : ''}">${i === 0 ? 'Today' : d} <small>${num}</small></button>`).join('')}</div>`;
       const grpRows = MEMBERS.map(([a, n]) => LOC[a]
         ? row({ attrs: `data-act="msel:stu:${a}"`, lead: ini(a, 36, 13), title: n, sub: LOC[a][2], chev: true })
         : row({ attrs: `data-go="member:${a}"`, lead: ini(a, 36, 13), title: n, sub: 'Not sharing location', subc: '', chev: true })).join('');
       bodyHtml = (b ? `<div class="seg">${[['events', 'Events'], ['group', 'Group 7']].map(([k, l]) => `<button data-act="mlist:${k}" class="${S.mlist === k ? 'on' : ''}">${l}</button>`).join('')}</div>` : '')
-        + sec('', b && S.mlist === 'group' ? grpRows : evRows);
+        + chips + sec('', grp ? grpRows : evRows);
     }
     return page(`<div class="mapwrap"><div id="lmap"></div><div class="map-prof">${profileBtn(40)}</div>
       <div class="fabs"><button class="fab ${S.share ? 'on' : ''}" data-modal="share" aria-label="Location sharing">${I(S.share ? 'navigation' : 'navigation-off', 20)}</button><button class="fab" data-act="recenter" aria-label="Show all">${I('locate-fixed', 20)}</button></div>
@@ -507,11 +637,11 @@ const SCREENS = {
 
   group: () => {
     const b = isBuddy(), anns = annList().slice(0, 2), checked = MEMBERS.filter(m => m[2]).length;
-    const buddies = ['henrik', 'sara'].map(k => row({ attrs: `data-go="buddy:${k}"`, lead: photo(k, 40), title: BUD[k].name + (b && k === 'henrik' ? ' ' + badge('You') : ''), sub: b ? (k === 'henrik' ? 'Buddy' : 'Co-buddy') : 'Your buddy', chev: true })).join('');
+    const buddies = ['henrik', 'sara'].map(k => row({ attrs: `data-go="buddy:${k}"`, lead: budPic(k, 40), title: BUD[k].name + (b && k === 'henrik' ? ' ' + badge('You') : ''), sub: b ? (k === 'henrik' ? 'Buddy' : 'Co-buddy') : 'Your buddy', chev: true })).join('');
     const members = MEMBERS.map(([a, n, ok]) => b
       ? row({ attrs: `data-go="member:${a}"`, lead: ini(a, 36, 13), title: n, sub: `<span class="dot" style="background:${ok ? 'var(--green)' : '#f08a24'};margin-right:6px"></span>${ok ? 'Checked in' : 'Not checked in'}`, chev: true })
-      : row({ tag: 'div', lead: ini(a, 36, 13), title: n + (a === 'IS' ? ' ' + badge('You') : ''), sub: 'New student',
-          right: a === 'IS' ? '' : `<a class="msg-btn" ${ext(CONFIG.messenger[a] || 'https://m.me/')} aria-label="Message ${n} on Messenger">${I('message-circle', 18)}</a>` })).join('');
+      : row({ tag: 'div', lead: ini(a, 36, 13), title: n + (a === 'IS' ? ' ' + badge('You') : ''), sub: NOFB.has(a) ? fbTag() : 'New student',
+          right: a === 'IS' ? '' : msgBtn(a, n, 'icon') })).join('');
     return page(`<div class="scroll">${large('Group 7', b ? 'You’re a buddy' : '10 students · 2 buddies', b ? `<div style="display:flex;gap:10px"><button data-modal="compose" class="circle-btn" aria-label="New announcement">${I('plus', 20)}</button>${profileBtn()}</div>` : profileBtn())}
       ${sec('Announcements', anns.map(annRow).join('') + row({ attrs: 'data-go="board"', title: '<span class="tint">See All</span>', chev: true }))}
       ${sec('', row({ tag: 'a', attrs: ext(CONFIG.messenger.group), lead: ibox('message-circle'), title: 'Open Group Chat', sub: 'Questions and conversations happen in Messenger', right: I('arrow-up-right', 18, 'l3') }))}
@@ -537,7 +667,7 @@ const SCREENS = {
 
   buddy: k => {
     const bd = BUD[k], self = isBuddy() && k === 'henrik';
-    return page(`${navbar()}<div class="scroll"><div class="center">${photo(k, 104)}<h1 class="t1" style="margin-top:8px">${bd.name}</h1><p class="s">${self ? 'You · Buddy for Group 7' : (isBuddy() ? 'Co-buddy · Group 7' : 'Your buddy · Group 7')}</p></div>
+    return page(`${navbar()}<div class="scroll"><div class="center">${budPic(k, 104)}<h1 class="t1" style="margin-top:8px">${bd.name}</h1><p class="s">${self ? 'You · Buddy for Group 7' : (isBuddy() ? 'Co-buddy · Group 7' : 'Your buddy · Group 7')}</p></div>
       ${self ? '' : `<div class="actions"><a class="act" ${ext(CONFIG.messenger[k])}>${I('message-circle', 22)}Message</a><a class="act" ${ext(CONFIG.messenger.group)}>${I('users', 22)}Group Chat</a></div>`}
       ${sec('About', `<p class="para">Here to help you settle in during Buddy Week. Questions big or small are welcome.</p>`, 'Conversations happen in Messenger. This app is for plans and announcements.')}
     </div>`);
@@ -545,8 +675,8 @@ const SCREENS = {
 
   member: a => {
     const m = MEMBERS.find(x => x[0] === a), loc = LOC[a], tel = a === 'EB' ? CONFIG.phones.emil : '';
-    return page(`${navbar()}<div class="scroll"><div class="center">${ini(a, 88, 30)}<h1 class="t1" style="margin-top:8px">${m[1]}</h1><p class="s">New student · Group 7</p>${m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')}</div>
-      <div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a><a class="act" ${ext(a === 'EB' ? CONFIG.messenger.emil : CONFIG.messenger.group)}>${I('message-circle', 22)}Message</a><button class="act ${loc ? '' : 'off'}" data-act="locate:${a}">${I('map-pin', 22)}Map</button></div>
+    return page(`${navbar()}<div class="scroll"><div class="center">${ini(a, 88, 30)}<h1 class="t1" style="margin-top:8px">${m[1]}</h1><p class="s">New student · Group 7</p>${m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')}${NOFB.has(a) ? fbTag() : ''}</div>
+      <div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a>${msgBtn(a, m[1].split(' ')[0])}<button class="act ${loc ? '' : 'off'}" data-act="locate:${a}">${I('map-pin', 22)}Map</button></div>
       ${sec('', (a === 'EB' ? row({ tag: 'a', attrs: `href="tel:${tel}"`, title: 'Phone', right: '<span class="val tint">+47 932 14 607</span>' }) : '')
         + row({ tag: 'div', title: 'Expected', right: '<span class="val">Samfundet · 22:00</span>' })
         + row({ tag: 'div', title: 'Location', right: `<span class="val">${loc ? 'Shared' : 'Not shared'}</span>` }),
@@ -564,7 +694,8 @@ const MODALS = {
       <div class="center">${myPic(88)}
         <div style="display:flex;gap:18px;margin:2px 0 6px"><label class="tint" style="font-size:15px;cursor:pointer">${hasPic ? 'Change Photo' : 'Add Photo'}<input type="file" id="picfile" accept="image/*" hidden></label>${hasPic ? '<button class="tint" style="font-size:15px" data-act="picremove">Remove</button>' : ''}</div>
         <p class="t2">${p.name}</p><p class="s">${p.sub}</p></div>
-      ${sec('', row({ tag: 'div', title: 'Phone', right: `<span class="val">+47 ${p.phone}</span>` }) + row({ attrs: 'data-close data-tab="group"', title: 'Group', right: '<span class="val">Group 7</span>', chev: true })
+      ${sec('', row({ tag: 'div', title: 'Phone', right: `<span class="val">${p.phone}</span>` })
+        + row({ attrs: `data-act="${S.fb === true ? 'fbunsync' : 'fbsync'}"`, title: 'Facebook', right: `<span class="val">${S.fb === true ? 'Synced' : S.fb === 'busy' ? 'Connecting…' : 'Sync now'}</span>` }) + row({ attrs: 'data-close data-tab="group"', title: 'Group', right: '<span class="val">Group 7</span>', chev: true })
         + row({ attrs: 'data-act="openshare"', title: 'Location Sharing', right: `<span class="val">${S.share ? 'On' : 'Off'}</span>`, chev: true }), isBuddy() ? 'Visible to your Group 7 students.' : 'Your number is only visible to your buddies.')}
       ${sec('Testing only · View as', `<div style="padding:8px">${`<div class="seg" style="margin:0">${[['student', 'Student'], ['buddy', 'Buddy']].map(([k, l]) => `<button data-act="role:${k}" class="${S.role === k ? 'on' : ''}">${l}</button>`).join('')}</div>`}</div>`)}
       ${sec('', row({ attrs: 'data-act="logout"', title: '<span class="red">Log Out of Feide</span>' }) + row({ attrs: 'data-act="askdelete"', title: '<span class="red">Delete Account</span>' }),
@@ -595,8 +726,8 @@ const MODALS = {
     const { ini: a, group, name } = S.person, own = group === 7, m = own && MEMBERS.find(x => x[0] === a), loc = own && LOC[a];
     const tel = a === 'EB' ? CONFIG.phones.emil : '';
     return `<div class="mnav"><span></span><span class="hl">${esc(name.split(' ')[0])}</span><button class="r" data-close>Done</button></div><div class="mscroll">
-      <div class="center">${ini(a, 72, 26)}<p class="t2" style="margin-top:6px">${esc(name)}</p><p class="s">New student · Group ${group}</p>${own ? (m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')) : ''}</div>
-      ${own ? `<div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a><a class="act" ${ext(a === 'EB' ? CONFIG.messenger.emil : CONFIG.messenger.group)}>${I('message-circle', 22)}Message</a><button class="act ${loc ? '' : 'off'}" data-act="plocate:${a}">${I('map-pin', 22)}Map</button></div>
+      <div class="center">${ini(a, 72, 26)}<p class="t2" style="margin-top:6px">${esc(name)}</p><p class="s">New student · Group ${group}</p>${own ? (m[2] ? badge('Checked in', 'g') : badge('Not checked in', 'o')) : ''}${own && NOFB.has(a) ? fbTag() : ''}</div>
+      ${own ? `<div class="actions"><a class="act" href="tel:${tel}">${I('phone', 22)}Call</a>${msgBtn(a, name.split(' ')[0])}<button class="act ${loc ? '' : 'off'}" data-act="plocate:${a}">${I('map-pin', 22)}Map</button></div>
         ${sec('', row({ tag: 'div', lead: ibox('map-pin', loc ? '' : 'gr'), title: loc ? 'Sharing location' : 'Location not shared', sub: loc ? loc[2] : 'Hasn’t opted in to location sharing' })
           + row({ attrs: `data-act="pprofile:${a}"`, lead: ibox('user-round', 'gr'), title: 'Open Full Profile', chev: true }))}`
       : sec('', row({ tag: 'div', lead: ibox('shield-check', 'gr'), title: 'Not in your group', sub: `Contact details and location are only visible to Group ${group}’s buddies.` }))
@@ -635,11 +766,12 @@ function render() {
     + (S.modal ? `<div class="modal-bg" data-close><div class="modal" data-stop><div class="mgrab" aria-hidden="true"></div>${MODALS[S.modal]()}</div></div>` : '')
     + (S.alert === 'delete' ? `<div class="alert-bg" role="alertdialog" aria-modal="true" aria-labelledby="altitle"><div class="alert"><div class="at"><b id="altitle">Delete Account?</b><p>Your Buddy Week account, profile, phone number and photo will be permanently deleted. You’ll be removed from Group 7.<br><br><b style="font-size:13px;display:inline">This can’t be undone.</b></p></div>
         <div class="ab"><button data-act="alertcancel">Cancel</button><button data-act="delacc" style="color:var(--red);font-weight:600">Delete</button></div></div></div>` : '')
-    + (S.toast ? `<div class="toast">${I('circle-check', 18)}${S.toast}</div>` : '');
+    + (S.toast ? `<div class="toast" role="status">${I(S.toastIcon || 'circle-check', 18)}${S.toast}</div>` : '');
   initMap();
+  const chip = app.querySelector('.mchip.on'); if (chip) chip.parentElement.scrollLeft = chip.offsetLeft - 16;
   window.lucide && lucide.createIcons();
 }
-function toast(t) { S.toast = t; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 1800); }
+function toast(t, icon) { S.toast = t; S.toastIcon = icon; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 1800); }
 
 const NORWAY = [[57.7, 4.0], [71.4, 31.6]];
 function initMap() {
@@ -647,7 +779,7 @@ function initMap() {
   const b = isBuddy();
   lmap = L.map(el, { zoomControl: false, maxBounds: NORWAY, maxBoundsViscosity: 1, minZoom: 5, maxZoom: 19 });
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, bounds: NORWAY, noWrap: true, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>' }).addTo(lmap);
-  const today = Object.keys(EV).filter(k => EV[k].d === 0);
+  const today = dayEvents(S.mday || 0);
   const selEv = S.msel && S.msel.startsWith('ev:') ? S.msel.slice(3) : null;
   const evs = selEv && !today.includes(selEv) ? [...today, selEv] : today;
   const pad = { paddingTopLeft: [40, 70], paddingBottomRight: [40, S.sheet === 'min' ? 140 : 360] };
@@ -710,7 +842,8 @@ document.addEventListener('click', e => {
   if ('back' in d) { if (history.state && history.state.app) history.back(); else { S.screen = S.tab; render(); } return; }
   if (d.go) return go(d.go);
   const [a, ...rest] = d.act.split(':'); const v = rest.join(':');
-  if (a === 'feidego') return go('welcome');
+  if (a === 'feidego') return go('welcome:0');
+  if (a === 'obshare') { S.share = v === '1'; if (S.share) toast('Location sharing on'); return go('welcome:3'); }
   if (a === 'start') { if (!phoneOk()) return; S.stack = []; history.pushState({ app: 1 }, ''); S.tab = 'today'; return go('today', false); }
   if (a === 'lang') S.lang++;
   else if (a === 'org') S.org++;
@@ -725,7 +858,7 @@ document.addEventListener('click', e => {
   else if (a === 'openshare') { S.modal = null; history.replaceState({ app: 1 }, ''); tab('map'); return openModal('share'); }
   else if (a === 'pin') S.pin = !S.pin;
   else if (a === 'role') { S.role = v; S.msel = null; S.mlist = 'events'; }
-  else if (a === 'logout') { Object.assign(S, { role: 'student', stack: [], joined: {}, share: false, modal: null, tab: 'today', screen: 'login', param: null }); history.replaceState({ app: 1 }, ''); }
+  else if (a === 'logout') { Object.assign(S, { role: 'student', stack: [], joinedBy: { student: {}, buddy: {} }, share: false, modal: null, tab: 'today', screen: 'login', param: null }); history.replaceState({ app: 1 }, ''); }
   else if (a === 'publish') {
     const text = S.draft.trim(); if (!text) return;
     post(text, null, S.pin);
@@ -739,10 +872,20 @@ document.addEventListener('click', e => {
     if (a === 'pprofile') return go('member:' + v);
     S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; S.mlist = 'group'; return selectOnMap('stu:' + v, 18);
   }
+  else if (a === 'fbsync') {
+    if (S.fb === 'busy') return;
+    S.fb = 'busy'; render();
+    return setTimeout(() => { S.fb = true; toast('Synced with Facebook'); render(); }, 1200);
+  }
+  else if (a === 'fbunsync') { S.fb = false; toast('Facebook sync turned off'); }
+  else if (a === 'hidesetup') S.setupHidden = true;
+  else if (a === 'mday') { const d = Math.max(0, Math.min(6, +v)); if (d === (S.mday || 0)) return; S.mday = d; S.msel = null; S.recenter = true; S.sheet = S.sheet === 'min' ? 'mid' : S.sheet; }
+  else if (a === 'nofb') { const n = MEMBERS.find(x => x[0] === v); toast(`${n ? n[1].split(' ')[0] : 'They'} hasn’t synced with Facebook yet`, 'info'); }
+  else if (a === 'findgroup') { S.mday = 0; tab('map'); return selectOnMap('meet', 16); }
   else if (a === 'askdelete') S.alert = 'delete';
   else if (a === 'alertcancel') S.alert = null;
   else if (a === 'delacc') {
-    Object.assign(S, { alert: null, modal: null, role: 'student', stack: [], joined: {}, share: false, pic: {}, phone: '', posts: [], tab: 'today', screen: 'login', param: null });
+    Object.assign(S, { alert: null, modal: null, role: 'student', stack: [], joinedBy: { student: {}, buddy: {} }, share: false, pic: {}, phone: '', cc: 'no', fb: false, posts: [], tab: 'today', screen: 'login', param: null });
     history.replaceState({ app: 1 }, ''); toast('Account deleted');
   }
   else if (a === 'picremove') S.pic[S.role] = null;
@@ -752,7 +895,7 @@ document.addEventListener('click', e => {
   else if (a === 'fset') S.form[v] = !S.form[v];
   else if (a === 'fsave') { if (formOk()) return saveEvent(); return; }
   else if (a === 'fdel') { if (S.form.del) return deleteEvent(); S.form.del = true; }
-  else if (a === 'showmap') { S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; return selectOnMap('ev:' + v, 16); }
+  else if (a === 'showmap') { S.mday = EV[v].d; S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; return selectOnMap('ev:' + v, 16); }
   else if (a === 'locate') { S.tab = 'map'; S.stack.push([S.screen, S.param]); history.pushState({ app: 1 }, ''); S.screen = 'map'; S.param = null; S.mlist = 'group'; return selectOnMap('stu:' + v, 18); }
   else if (a === 'msel') return selectOnMap(v);
   else if (a === 'meet') return selectOnMap('meet', 16);
@@ -765,13 +908,27 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   if (e.target.id === 'draft') { S.draft = e.target.value; document.getElementById('count').textContent = S.draft.length; document.getElementById('post').disabled = !S.draft.trim(); }
   if (e.target.id === 'phone') {
-    S.phone = e.target.value; const ok = phoneOk();
-    document.getElementById('phoneok').style.visibility = ok ? '' : 'hidden';
-    document.getElementById('startbtn').disabled = !ok;
-    document.getElementById('phonehint').style.visibility = ok ? 'hidden' : '';
+    // Digits only, never more than the country allows
+    const digits = e.target.value.replace(/\D/g, '').slice(0, ccOf().len[1]);
+    if (e.target.value !== digits) e.target.value = digits;
+    S.phone = digits; updatePhoneUI();
   }
   if (e.target.dataset.f && S.form) { S.form[e.target.dataset.f] = e.target.value; const s = document.getElementById('save'); if (s) s.disabled = !formOk(); }
 });
+function updatePhoneUI() {
+  const ok = phoneOk(), $ = id => document.getElementById(id); if (!$('phone')) return;
+  $('phoneok').style.visibility = ok ? '' : 'hidden';
+  $('startbtn').disabled = !ok;
+  $('phonehint').textContent = phoneHint(); $('phonehint').style.visibility = ok ? 'hidden' : '';
+  window.lucide && lucide.createIcons();
+}
+// Country picker on the welcome screen
+document.addEventListener('change', e => {
+  if (e.target.id !== 'cc') return;
+  S.cc = e.target.value; S.phone = S.phone.slice(0, ccOf().len[1]); render();
+  const p = document.getElementById('phone'); if (p) p.focus();
+});
+
 // ---------- draggable sheets ----------
 // Map panel snaps between three heights; pop-up sheets can be dragged down to close.
 const SHEET_H = { min: '118px', mid: '45%', max: '90%' };

@@ -1,10 +1,10 @@
 // Buddy Week data (copied from the original app)
 const CONFIG = {
-  messenger: { group: 'https://m.me/', henrik: 'https://m.me/', sara: 'https://m.me/', emil: 'https://m.me/' },
+  messenger: { group: 'https://www.messenger.com/t/2841792832860298', henrik: 'https://m.me/', sara: 'https://m.me/', emil: 'https://m.me/' },
   phones: { emil: '+4793214607' },
 };
 const maps = q => 'https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + encodeURIComponent(q);
-const BUD = { henrik: { name: 'Henrik Aune', photo: 'henrik-3', short: 'Henrik' }, sara: { name: 'Sara Lund', photo: 'sara-3', short: 'Sara' } };
+const BUD = { henrik: { name: 'Henrik Aune', photo: 'henrik', short: 'Henrik' }, sara: { name: 'Sara Lund', photo: 'sara', short: 'Sara' } };
 const DAYS = [['Mon', 10, 'Monday'], ['Tue', 11, 'Tuesday'], ['Wed', 12, 'Wednesday'], ['Thu', 13, 'Thursday'], ['Fri', 14, 'Friday'], ['Sat', 15, 'Saturday'], ['Sun', 16, 'Sunday']];
 const EV = {
   tour: { d: 0, t: '12:00', place: 'Gløshaugen', title: 'Campus tour', tags: ['My group'], mine: 1, sub: 'Today · Group 7 · My group', venue: 'Gløshaugen · Main building', addr: 'Høgskoleringen 1 · main building entrance', mapName: 'Gløshaugen', street: 'Høgskoleringen', cap: 'Main entrance', dist: '600 m · 8 min walk', about: 'A relaxed walk around campus with Group 7 to find lecture halls, the library and the canteen.', bring: 'Comfortable shoes and a light jacket.', buddy: 'sara', going: 9, dest: 'NTNU Hovedbygningen, Høgskoleringen 1, Trondheim' },
@@ -60,6 +60,6 @@ const attendees = k => {
     list.push({ name, ini: f[0] + l[0], group: g });
   }
   list.sort((a, b) => a.name.localeCompare(b.name));
-  if (S.joined[k]) list.unshift({ name: 'Ingrid Solberg', ini: 'IS', group: 7, you: 1 });
+  if (S.joined[k]) list.unshift(S.role === 'buddy' ? { name: 'Henrik Aune', ini: 'HA', group: 7, you: 1, buddy: 1 } : { name: 'Ingrid Solberg', ini: 'IS', group: 7, you: 1 });
   return list;
 };
